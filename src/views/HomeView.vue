@@ -6,18 +6,13 @@
       <h2 class="ml-6 mt-2 text-lg">Estos son los cortes de calles autorizados hasta ahora.</h2>
 
       <!-- Botón sobre el mapa -->
-      <button
-        @click="openModal"
-        class="absolute top-6 right-0 p-3 rounded-full bg-green-500 text-white shadow-md hover:bg-green-700"
-      >
+      <button @click="openModal"
+        class="absolute top-6 right-0 p-3 rounded-full bg-green-500 text-white shadow-md hover:bg-green-700">
         <i class="fa-solid fa-plus mx-2"></i>
         <span class="font-semibold" style="font-size: 18px;">Solicitar permiso</span>
       </button>
 
-      <map-viewer
-        class="ml-6 mt-2 mb-2 flex-1"
-        @map-click="handleMapClick"
-      ></map-viewer>
+      <map-viewer class="ml-6 mt-2 mb-2 flex-1"></map-viewer>
     </div>
 
     <!-- Contenedor derecho: Notificaciones -->
@@ -28,8 +23,9 @@
       </div>
 
       <!-- Ejemplo de notificaciones -->
-      <NotificationCard tipo="total" descripcion="Corte total en calle Principal" />
-      <NotificationCard tipo="parcial" descripcion="Corte parcial en calle Secundaria" />
+      <NotificationCard class="ml-2" tipo="total" descripcion="Corte total en calle Principal" />
+      <NotificationCard class="ml-2" tipo="parcial" descripcion="Corte parcial en calle Secundaria" />
+      
     </div>
 
     <!-- Modal -->
