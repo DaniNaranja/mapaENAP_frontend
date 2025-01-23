@@ -17,11 +17,7 @@
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
   
-      // Puedes agregar marcadores o funcionalidades extra aquí
-      /*L.marker([40.7128, -74.006])
-        .addTo(map)
-        .bindPopup('Un marcador de ejemplo.')
-        .openPopup();*/
+     
     },
   };
   </script>
