@@ -59,16 +59,16 @@ export default {
           longitud: -73.1237,
           inicio: "24-01-2025 15:30",
           termino: "24-01-2025 20:00",
-          motivo: "Reparaciones en vía x",
+          motivo: "Reparaciones en via x"
         },
         {
           tipo: "parcial",
-          calle: "8 Oriente, entre A y B",
-          latitud: -36.7785,
-          longitud: -73.1237,
-          inicio: "24-01-2025 15:30",
+          calle: "Corte parcial en calle Secundaria",
+          latitud: -36.7800,
+          longitud: -73.1200,
+          inicio: "24-01-2025 15:00",
           termino: "24-01-2025 20:00",
-          motivo: "Reparaciones en vía x",
+          motivo: "Remocion de materiales"
         },
       ],
       mostrarModalRegistro: false,

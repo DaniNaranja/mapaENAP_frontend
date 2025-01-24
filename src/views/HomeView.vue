@@ -12,7 +12,7 @@
         <span class="font-semibold" style="font-size: 18px;">Solicitar permiso</span>
       </button>
 
-      <map-viewer class="ml-6 mt-2 mb-2 flex-1"></map-viewer>
+      <map-viewer class="ml-6 mt-2 mb-2 flex-1" :cortes="cortes"></map-viewer>
     </div>
 
     <!-- Contenedor derecho: Notificaciones -->
