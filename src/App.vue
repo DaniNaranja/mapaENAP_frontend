@@ -5,7 +5,7 @@
     
     <!-- Contenedor principal con Sidebar y RouterView -->
     <div id="app" class="flex flex-row flex-grow">
-      <SideBar />
+      <SideBar class="sidebar"/>
       <div class="flex-grow bg-gray-50">
         <RouterView />
       </div>
@@ -25,3 +25,9 @@ export default {
   },
 };
 </script>
+
+<style>
+.sidebar {
+  flex-shrink: 0; /* Asegura que el ancho del sidebar sea fijo */
+}
+</style>
