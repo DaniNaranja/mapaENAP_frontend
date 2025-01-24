@@ -1,0 +1,163 @@
+<template>
+  <div v-if="visible" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-2/5">
+      <h2 class="text-xl font-bold mb-4">Registrar nuevo corte</h2>
+      <form @submit.prevent="registrarCorte">
+        <!-- Calle -->
+        <div class="mb-4">
+          <label class="block font-bold mb-2" for="calle">Nombre de la calle</label>
+          <input
+            id="calle"
+            v-model="form.calle"
+            class="border rounded w-full py-2 px-3"
+            type="text"
+            placeholder="Nombre de la calle"
+            required
+          />
+        </div>
+
+        <!-- Latitud -->
+        <div class="mb-4">
+          <label class="block font-bold mb-2" for="latitud">Latitud</label>
+          <input
+            id="latitud"
+            v-model="form.latitud"
+            class="border rounded w-full py-2 px-3 bg-gray-100"
+            type="number"
+            readonly
+          />
+        </div>
+
+        <!-- Longitud -->
+        <div class="mb-4">
+          <label class="block font-bold mb-2" for="longitud">Longitud</label>
+          <input
+            id="longitud"
+            v-model="form.longitud"
+            class="border rounded w-full py-2 px-3 bg-gray-100"
+            type="number"
+            readonly
+          />
+        </div>
+
+        <!-- Tipo de corte -->
+        <div class="mb-4">
+          <label class="block font-bold mb-2" for="tipo">Tipo de corte</label>
+          <select
+            id="tipo"
+            v-model="form.tipo"
+            class="border rounded w-full py-2 px-3"
+            required
+          >
+            <option value="total">Total</option>
+            <option value="parcial">Parcial</option>
+          </select>
+        </div>
+
+        <!-- Inicio -->
+        <div class="mb-4">
+          <label class="block font-bold mb-2" for="inicio">Fecha y hora de inicio</label>
+          <input
+            id="inicio"
+            v-model="form.inicio"
+            class="border rounded w-full py-2 px-3"
+            type="datetime-local"
+            required
+          />
+        </div>
+
+        <!-- Término -->
+        <div class="mb-4">
+          <label class="block font-bold mb-2" for="termino">Fecha y hora de término</label>
+          <input
+            id="termino"
+            v-model="form.termino"
+            class="border rounded w-full py-2 px-3"
+            type="datetime-local"
+            required
+          />
+        </div>
+
+        <!-- Motivo -->
+        <div class="mb-4">
+          <label class="block font-bold mb-2" for="motivo">Motivo</label>
+          <textarea
+            id="motivo"
+            v-model="form.motivo"
+            class="border rounded w-full py-2 px-3"
+            placeholder="Motivo del corte"
+            required
+          ></textarea>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-end">
+          <button
+            type="button"
+            class="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+            @click="cerrar"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "ModalRegistroCorte",
+  props: {
+    visible: {
+      type: Boolean,
+      required: true,
+    },
+    coordenadas: {
+      type: Object,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      form: {
+        calle: "",
+        latitud: this.coordenadas.lat,
+        longitud: this.coordenadas.lng,
+        tipo: "total",
+        inicio: "",
+        termino: "",
+        motivo: "",
+      },
+    };
+  },
+  watch: {
+    // Actualizar latitud y longitud si cambian las coordenadas
+    coordenadas: {
+      immediate: true,
+      handler(newCoordenadas) {
+        this.form.latitud = newCoordenadas.lat;
+        this.form.longitud = newCoordenadas.lng;
+      },
+    },
+  },
+  methods: {
+    cerrar() {
+      this.$emit("close");
+    },
+    registrarCorte() {
+      // Crear el nuevo corte con los datos del formulario
+      const nuevoCorte = { ...this.form };
+      this.$emit("registrar-corte", nuevoCorte); // Emitir evento con los datos
+      this.cerrar(); // Cerrar el modal
+    },
+  },
+};
+</script>
+
+<style scoped>
+/* Personaliza estilos si es necesario */
+</style>

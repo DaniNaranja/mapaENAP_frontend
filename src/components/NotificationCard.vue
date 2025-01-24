@@ -1,9 +1,10 @@
 <template>
     <div
       :class="[
-        'border-l-4 p-4 mb-4 flex items-center shadow-md',
-        tipo === 'total' ? 'border-red-500 bg-red-100' : 'border-yellow-500 bg-yellow-100'
+        'border-l-4 p-4 mb-4 flex items-center shadow-md cursor-pointer transition-all duration-200',
+        tipo === 'total' ? 'border-red-500 bg-red-100 hover:bg-red-300' : 'border-yellow-500 bg-yellow-100 hover:bg-yellow-300'
       ]"
+      @click="handleClick"
     >
       <div
         :class="[
@@ -17,7 +18,7 @@
         <p class="font-bold text-lg">
           {{ tipo === 'total' ? 'Corte Total' : 'Corte Parcial' }}
         </p>
-        <p class="text-sm">{{ descripcion }}</p>
+        <p class="text-sm">{{ calle }}</p>
       </div>
     </div>
   </template>
@@ -30,15 +31,41 @@
         type: String,
         required: true, // 'total' o 'parcial'
       },
-      descripcion: {
+      calle: {
         type: String,
         required: true,
+      },
+      latitud: {
+        type: String,
+        required: true,
+      },
+      longitud: {
+        type: String,
+        required: true,
+      },
+    },
+    methods: {
+      handleClick() {
+        // Emitir evento con los detalles del corte
+        this.$emit("notification-clicked", {
+          tipo: this.tipo,
+          calle: this.calle,
+          latitud: this.latitud,
+          longitud: this.longitud,
+        });
       },
     },
   };
   </script>
   
   <style scoped>
-  /* Puedes agregar estilos adicionales si es necesario */
+  /* Agregar efecto hover para oscurecer el fondo */
+  .notification-card {
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .notification-card:hover {
+    filter: brightness(0.85); /* Oscurecer el fondo */
+  }
   </style>
   

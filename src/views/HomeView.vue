@@ -7,7 +7,7 @@
 
       <!-- Botón sobre el mapa -->
       <button @click="openModal"
-        class="absolute top-6 right-0 p-3 rounded-full bg-green-500 text-white shadow-md hover:bg-green-700">
+        class="soliButton absolute top-6 right-0 p-3 rounded-full bg-green-500 text-white shadow-md hover:bg-green-700">
         <i class="fa-solid fa-plus mx-2"></i>
         <span class="font-semibold" style="font-size: 18px;">Solicitar permiso</span>
       </button>
@@ -23,18 +23,23 @@
       </div>
 
       <!-- Ejemplo de notificaciones -->
-      <NotificationCard class="ml-2" tipo="total" descripcion="Corte total en calle Principal" />
-      <NotificationCard class="ml-2" tipo="parcial" descripcion="Corte parcial en calle Secundaria" />
+      <NotificationCard v-for="(corte, index) in cortes" :key="index" :tipo="corte.tipo"
+        :calle="corte.calle" @click="openDetallesModal(corte)" />
+
       
+
     </div>
 
     <!-- Modal -->
     <Modal ref="modal" />
+    <!-- Modal de detalles -->
+    <ModalDetalles ref="modalDetalles" />
   </div>
 </template>
 
 <script>
 import Modal from "@/components/ModalSolicitud.vue";
+import ModalDetalles from "@/components/ModalDetalle.vue"
 import NotificationCard from "@/components/NotificationCard.vue";
 import MapViewer from "@/components/MapViewer.vue";
 
@@ -42,16 +47,40 @@ export default {
   name: "HomeView",
   components: {
     Modal,
+    ModalDetalles,
     NotificationCard,
     MapViewer,
+  },
+  data() {
+    return {
+      cortes: [
+        {
+          tipo: "total",
+          calle: "Corte total en calle Principal",
+          latitud: -36.7793,
+          longitud: -73.1237,
+          inicio: "24-01-2025 15:30",
+          termino: "24-01-2025 20:00",
+          motivo: "Reparaciones en via x"
+        },
+        {
+          tipo: "parcial",
+          calle: "Corte parcial en calle Secundaria",
+          latitud: -36.7800,
+          longitud: -73.1200,
+          inicio: "24-01-2025 15:00",
+          termino: "24-01-2025 20:00",
+          motivo: "Remocion de materiales"
+        },
+      ],
+    };
   },
   methods: {
     openModal() {
       this.$refs.modal.open(); // Abre el modal cuando el botón es clickeado
     },
-    handleMapClick(lat, lng) {
-      // Llama al método setCoordinates del modal para establecer la latitud y longitud
-      this.$refs.modal.setCoordinates(lat, lng);
+    openDetallesModal(corte) {
+      this.$refs.modalDetalles.open(corte); // Abre el modal de detalles con datos
     },
   },
 };
@@ -59,4 +88,7 @@ export default {
 
 <style scoped>
 /* Ajustes de estilos si es necesario */
+.soliButton {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
 </style>
