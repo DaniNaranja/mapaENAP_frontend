@@ -27,7 +27,10 @@
         
         <!-- Menú desplegable, posicionado fuera de la navbar -->
         <div v-if="showMenu" class="fixed top-20 right-6 w-48 bg-red-300 shadow-lg rounded-md px-2 py-3 z-50 hover:bg-red-500">
-          <button @click="logout" class="w-full text-left text-red-950 hover:text-white">Cerrar sesión</button>
+          <button @click="logout" class="w-full text-red-950 hover:text-white">Cerrar sesión
+            <i class="fa fa-sign-out text-2xl float-right" aria-hidden="true"></i>
+          </button>
+          
         </div>
       </div>
   
