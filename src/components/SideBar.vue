@@ -1,5 +1,5 @@
 <template>
-    <div v-if="mostrarSidebar" class="sidebar bg-gradient-to-b from-violet-500 to-indigo-800">
+    <div v-if="mostrarSidebar" class="sidebar bg-gradient-to-b from-purple-500 to-indigo-800">
       <RouterLink to="/mapa">
         <div class="flex items-center justify-between pr-4 pl-4 pt-2 pb-2 hover:bg-violet-900">
           <div class="flex items-center">

@@ -3,7 +3,7 @@
     <!-- Contenedor izquierdo: Título, mapa y botón -->
     <div class="flex-1 flex flex-col relative w-4/5 mr-5">
       <h1 class="ml-6 mt-2 font-bold text-2xl">Cortes de calles</h1>
-      <h2 class="ml-6 mt-2 text-lg">Estos son los cortes de calles autorizados hasta ahora para hoy.</h2>
+      <h2 class="ml-6 mt-2 text-lg">Estos son los cortes de calles autorizados hasta ahora.</h2>
 
       <!-- Botón sobre el mapa -->
       <button @click="openModal"

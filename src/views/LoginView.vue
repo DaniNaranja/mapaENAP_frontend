@@ -37,13 +37,13 @@
 
           <button
             type="submit"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-semibold rounded-md py-5 px-4 w-full text-xl mt-4"
+            class="bg-sky-500 hover:bg-blue-600 text-white font-semibold rounded-md py-5 px-4 w-full text-xl mt-4"
           >
             Ingresar
           </button>
         </form>
 
-        <div v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</div>
+        <div v-if="errorMessage" class="text-red-500 mt-2 bg-red-300 px-4 py-2 rounded">{{ errorMessage }}</div>
 
       </div>
     </div>
