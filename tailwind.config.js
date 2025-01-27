@@ -8,7 +8,10 @@ module.exports = {
       fontFamily: {
         sans: ['Poppins', 'sans-serif'], // Agrega Poppins como fuente predeterminada
       },
-    },
+      colors: {
+      "violeta": "#A278D7"
+      },
   },
   plugins: [],
+}
 }

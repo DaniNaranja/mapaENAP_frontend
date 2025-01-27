@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import MapaView from '../views/MapaView.vue'
 import PermisosView from '../views/PermisosView.vue'
 import HistorialView from '@/views/HistorialView.vue'
+import LoginView from '../views/LoginView.vue'
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/historial',
     name: 'historial',
     component: HistorialView
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView
   }
 ]
 
