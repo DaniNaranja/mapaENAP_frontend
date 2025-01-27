@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-screen">
     <!-- Navbar ocupa la parte superior -->
-    <nav-bar class="navbar"></nav-bar>
+    <nav-bar class="navbar" :key="authKey"></nav-bar>
     
     <!-- Contenedor principal con Sidebar y RouterView -->
     <div id="app" class="flex flex-row flex-grow">
@@ -23,6 +23,8 @@ export default {
     NavBar,
     SideBar,
   },
+
+  
 };
 </script>
 
