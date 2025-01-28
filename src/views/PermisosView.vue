@@ -1,5 +1,5 @@
 <template>
-  <div class="home p-6 h-[5rem]">
+  <div class="home p-6">
     <h1 class="text-2xl font-bold mb-6">Permisos</h1>
 
     <div class="space-y-4">

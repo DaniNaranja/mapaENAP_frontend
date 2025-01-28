@@ -74,7 +74,7 @@
             v-model="form.termino"
             class="border rounded w-full py-2 px-3"
             type="datetime-local"
-            required
+            
           />
         </div>
 
@@ -94,12 +94,12 @@
         <div class="flex justify-end">
           <button
             type="button"
-            class="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+            class="bg-gray-500 text-white px-5 py-3 rounded mr-2 font-semibold hover:bg-gray-600"
             @click="cerrar"
           >
             Cancelar
           </button>
-          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+          <button type="submit" class="bg-green-500 text-white px-5 py-3 rounded font-semibold hover:bg-green-600">
             Guardar
           </button>
         </div>
@@ -150,6 +150,9 @@ export default {
     },
     registrarCorte() {
       // Crear el nuevo corte con los datos del formulario
+      if (!this.form.termino) {
+    this.form.termino = null;
+  }
       const nuevoCorte = { ...this.form };
       this.$emit("registrar-corte", nuevoCorte); // Emitir evento con los datos
       this.cerrar(); // Cerrar el modal

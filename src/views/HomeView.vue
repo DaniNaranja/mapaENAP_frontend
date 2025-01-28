@@ -26,8 +26,6 @@
       <NotificationCard v-for="(corte, index) in cortes" :key="index" :tipo="corte.tipo"
         :calle="corte.calle" @click="openDetallesModal(corte)" />
 
-      
-
     </div>
 
     <!-- Modal -->
