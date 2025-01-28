@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar bg-gradient-to-r from-gray-100 to-violet-200 h-20 flex items-center">
+    <div class="navbar bg-gradient-to-r from-gray-100 to-violet-200 h-20 flex items-center sticky top-0">
       <!-- Contenedor del logo condicional -->
       <div v-if="isAuthenticated" class="flex items-center">
         <router-link to="/mapa">

@@ -100,6 +100,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useToast } from "vue-toastification";
@@ -132,17 +134,7 @@ export default {
                 this.miniMap.remove(); // Limpiar el mapa cuando se cierra el modal
             }
         },
-        submitForm() {
-            console.log("Formulario enviado:", this.form);
 
-            const toast = useToast();
-            toast.success("El formulario se ha enviado correctamente.", {
-                position: "bottom-right",
-                timeout: 3000,
-            });
-
-            this.close(); // Cierra el modal después de enviar el formulario
-        },
         initializeMiniMap() {
             // Inicializar el mini mapa
             this.miniMap = L.map('mini-map').setView([this.form.latitud, this.form.longitud], 16);
@@ -172,6 +164,53 @@ export default {
                 this.form.longitud = position.lng;
             });
         },
+
+        submitForm() {
+            // Validar campos obligatorios
+            if (!this.form.tipo || !this.form.fecha || !this.form.solicitante || !this.form.motivo || !this.form.inicio || !this.form.termino || !this.form.calle || !this.form.latitud || !this.form.longitud) {
+                const toast = useToast();
+                toast.error("Por favor, complete todos los campos requeridos.", {
+                    position: "bottom-right",
+                    timeout: 3000,
+                });
+                return;
+            }
+
+            const data = {
+                ...this.form,
+                inicio: new Date(this.form.inicio).toISOString(), // Convertir la fecha de inicio a formato ISO
+                termino: new Date(this.form.termino).toISOString(),
+
+            }
+
+            // Enviar datos al backend
+            axios.post("http://localhost:3002/permisos", data)
+                .then(response => {
+                    const toast = useToast();
+                    toast.success("El permiso se ha registrado correctamente.", {
+                        position: "bottom-right",
+                        timeout: 3000,
+                    });
+                    console.log("Respuesta del servidor:", response.data);
+
+                    // Reiniciar formulario y cerrar modal
+                    this.form = {
+                        tipo: "total",
+                        latitud: "-36.77933674462178",
+                        longitud: "-73.12370348487816",
+                    };
+                    this.close();
+                })
+                .catch(error => {
+                    const toast = useToast();
+                    toast.error("Ocurrió un error al registrar el permiso.", {
+                        position: "bottom-right",
+                        timeout: 3000,
+                    });
+                    console.error("Error del servidor:", error.response || error);
+                });
+        },
+
     },
 };
 </script>

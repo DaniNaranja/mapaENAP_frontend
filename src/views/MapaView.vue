@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import axios from "@/plugins/axios";
 import ModalRegistroCorte from "@/components/ModalRegistroCorte.vue";
 import ModalDetalles from "@/components/ModalDetalle.vue";
 import NotificationCard from "@/components/NotificationCard.vue";
@@ -51,31 +52,21 @@ export default {
   },
   data() {
     return {
-      cortes: [
-        {
-          tipo: "total",
-          calle: "Corte total en calle Principal",
-          latitud: -36.7793,
-          longitud: -73.1237,
-          inicio: "24-01-2025 15:30",
-          termino: "24-01-2025 20:00",
-          motivo: "Reparaciones en via x"
-        },
-        {
-          tipo: "parcial",
-          calle: "Corte parcial en calle Secundaria",
-          latitud: -36.7800,
-          longitud: -73.1200,
-          inicio: "24-01-2025 15:00",
-          termino: "24-01-2025 20:00",
-          motivo: "Remocion de materiales"
-        },
-      ],
+      cortes: [],
       mostrarModalRegistro: false,
       coordenadas: null,
     };
   },
   methods: {
+
+    async fetchCortes() {
+      try {
+        const response = await axios.get("http://localhost:3002/cortes");
+        this.cortes = response.data;
+      } catch (error) {
+        console.error("Error al obtener los cortes:", error);
+      }
+    },
     mostrarModal(coordenadas) {
       this.coordenadas = coordenadas;
       this.mostrarModalRegistro = true;
@@ -91,5 +82,8 @@ export default {
       this.$refs.modalDetalles.open(corte);
     },
   },
+  mounted() {
+    this.fetchCortes();
+  }
 };
 </script>

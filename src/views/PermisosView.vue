@@ -1,5 +1,5 @@
 <template>
-  <div class="home p-6">
+  <div class="home p-6 h-[5rem]">
     <h1 class="text-2xl font-bold mb-6">Permisos</h1>
 
     <div class="space-y-4">
@@ -22,8 +22,8 @@
           <div class="text-base text-gray-800">{{ permiso.id }}</div>
           <div class="text-base">
             <span :class="{
-              'bg-red-500 text-white': permiso.tipo === 'Total',
-              'bg-yellow-500 text-white': permiso.tipo === 'Parcial'
+              'bg-red-500 text-white': permiso.tipo === 'total',
+              'bg-yellow-500 text-white': permiso.tipo === 'parcial'
             }" class="inline-block px-4 py-2 rounded-full text-base font-bold capitalize">
               {{ permiso.tipo }}
             </span>
@@ -35,7 +35,7 @@
           <div class="text-base text-gray-800">{{ permiso.fecha }}</div>
           <div class="text-base">
             <span :class="{
-              'bg-slate-600 text-white': permiso.estado === 'En revisión',
+              'bg-slate-600 text-white': permiso.estado === 'En revision',
               'bg-green-500 text-white': permiso.estado === 'AUTORIZADO',
               'bg-red-500 text-white': permiso.estado === 'RECHAZADO',
             }" class="inline-block px-4 py-2 rounded-full text-base font-bold">
@@ -120,6 +120,7 @@
 </template>
 
 <script>
+import axios from "@/plugins/axios";
 import L from 'leaflet';
 import { useToast } from 'vue-toastification';
 
@@ -127,55 +128,42 @@ export default {
   name: "PermisosView",
   data() {
     return {
-      permisos: [
-        {
-          id: 1,
-          tipo: "Total",
-          fecha: "20-01-2025",
-          solicitante: "María Gómez",
-          motivo: "Construcción",
-          inicio: "24-01-2025 15:30",
-          termino: "24-01-2025 20:00",
-          calle: "Sur 3",
-          latitud: -36.7780,
-          longitud: -73.1240,
-          observacion: "Puede extenderse por x",
-          estado: "En revisión",
-        },
-        {
-          id: 2,
-          tipo: "Parcial",
-          fecha: "24-01-2025",
-          solicitante: "María Gómez",
-          motivo: "Hay que poner un texto qlo inmenso porque los usuarios son simios y tal vez usarian la wea mal, si de hecho te enseñan a hacerlo a prueba de cavernicolas",
-          inicio: "24-01-2025 15:30",
-          termino: "24-01-2025 20:00",
-          calle: "Sur 3",
-          latitud: -36.7793,
-          longitud: -73.1235,
-          observacion: "hola",
-          estado: "AUTORIZADO",
-        },
-        {
-          id: 3,
-          tipo: "Total",
-          fecha: "23-01-2025",
-          solicitante: "María Gómez",
-          motivo: "Construcción",
-          inicio: "25-01-2025 15:30",
-          termino: "24-01-2025 20:00",
-          calle: "Sur 3",
-          latitud: -36.7785,
-          longitud: -73.1232,
-          observacion: "",
-          estado: "RECHAZADO",
-        },
-      ],
+      permisos: [],
       isModalVisible: false,
       selectedPermiso: null,
     };
   },
   methods: {
+
+    
+    async fetchPermisos() {
+  try {
+    // Retrieve the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      console.error("Token no encontrado. Por favor, inicie sesión.");
+      return;
+    }
+    
+    const response = await axios.get("http://localhost:3002/permisos", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    this.permisos = response.data;
+    this.permisos.sort((a, b) => b.id - a.id); // Descending order by ID
+
+  } catch (error) {
+    console.error("Error al obtener los permisos:", error);
+    if (error.response && error.response.status === 401) {
+      console.error("No autorizado. Verifique el token.");
+    }
+  }
+},
+
+
+
     openModal(permiso) {
       this.selectedPermiso = permiso;
       this.isModalVisible = true;
@@ -208,16 +196,97 @@ export default {
         .bindPopup("Ubicación del permiso")
         .openPopup();
     },
-    autorizarPermiso() {
-      this.selectedPermiso.estado = "AUTORIZADO";
+    async autorizarPermiso() {
+  try {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      console.error("Token no encontrado. Por favor, inicie sesión.");
+      return;
+    }
+
+    // Send the full data along with the modified status
+    const permisoData = {
+      ...this.selectedPermiso, // Spread the existing permission data
+      estado: "AUTORIZADO", // Update the status
+    };
+
+    // Send the update request to the backend
+    const response = await axios.put(`http://localhost:3002/permisos/${this.selectedPermiso.id}`, permisoData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    // Check for successful response and show toast
+    if (response.status === 200) {
+      // Update the state of the permiso in the list directly
+      const index = this.permisos.findIndex(p => p.id === this.selectedPermiso.id);
+      if (index !== -1) {
+        this.permisos[index].estado = "AUTORIZADO";
+      }
+      this.permisos.sort((a, b) => b.id - a.id); // Descending order by ID
+
+
       this.toast.success("Permiso autorizado correctamente");
       this.closeModal();
-    },
-    rechazarPermiso() {
-      this.selectedPermiso.estado = "RECHAZADO";
+    } else {
+      this.toast.error("Hubo un error al autorizar el permiso");
+    }
+  } catch (error) {
+    console.error("Error al autorizar el permiso:", error);
+    this.toast.error("Hubo un error al autorizar el permiso");
+  }
+},
+
+async rechazarPermiso() {
+  try {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      console.error("Token no encontrado. Por favor, inicie sesión.");
+      return;
+    }
+
+    // Send the full data along with the modified status
+    const permisoData = {
+      ...this.selectedPermiso, // Spread the existing permission data
+      estado: "RECHAZADO", // Update the status
+    };
+
+    // Send the update request to the backend
+    const response = await axios.put(`http://localhost:3002/permisos/${this.selectedPermiso.id}`, permisoData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    // Check for successful response and show toast
+    if (response.status === 200) {
+      // Update the state of the permiso in the list directly
+      const index = this.permisos.findIndex(p => p.id === this.selectedPermiso.id);
+      if (index !== -1) {
+        this.permisos[index].estado = "RECHAZADO";
+      }
+
+      this.permisos.sort((a, b) => b.id - a.id); // Descending order by ID
+
+
       this.toast.error("Permiso rechazado correctamente");
       this.closeModal();
-    },
+    } else {
+      this.toast.error("Hubo un error al rechazar el permiso");
+    }
+  } catch (error) {
+    console.error("Error al rechazar el permiso:", error);
+    this.toast.error("Hubo un error al rechazar el permiso");
+  }
+},
+
+
+  },
+  mounted() {
+    this.fetchPermisos();
   },
   computed: {
     toast() {

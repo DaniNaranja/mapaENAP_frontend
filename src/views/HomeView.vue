@@ -31,13 +31,15 @@
     </div>
 
     <!-- Modal -->
-    <Modal ref="modal" />
+    <Modal ref="modal" @submit="createPermiso" @close="$refs.modal.close()" />
+
     <!-- Modal de detalles -->
     <ModalDetalles ref="modalDetalles" />
   </div>
 </template>
 
 <script>
+import axios from "@/plugins/axios";
 import Modal from "@/components/ModalSolicitud.vue";
 import ModalDetalles from "@/components/ModalDetalle.vue"
 import NotificationCard from "@/components/NotificationCard.vue";
@@ -53,29 +55,31 @@ export default {
   },
   data() {
     return {
-      cortes: [
-        {
-          tipo: "total",
-          calle: "Corte total en calle Principal",
-          latitud: -36.7793,
-          longitud: -73.1237,
-          inicio: "24-01-2025 15:30",
-          termino: "24-01-2025 20:00",
-          motivo: "Reparaciones en via x"
-        },
-        {
-          tipo: "parcial",
-          calle: "Corte parcial en calle Secundaria",
-          latitud: -36.7800,
-          longitud: -73.1200,
-          inicio: "24-01-2025 15:00",
-          termino: "24-01-2025 20:00",
-          motivo: "Remocion de materiales"
-        },
-      ],
+      cortes: [],
     };
   },
   methods: {
+
+    async fetchCortes() {
+      try {
+        const response = await axios.get("http://localhost:3002/cortes");
+        this.cortes = response.data;
+      } catch (error) {
+        console.error("Error al obtener los cortes:", error);
+      }
+    },
+
+    async createPermiso(nuevoPermiso) {
+      try {
+        const response = await axios.post("/permisos", nuevoPermiso);
+        // Agregar el nuevo permiso al estado
+        this.cortes.push(response.data);
+        this.$refs.modal.close(); // Cerrar el modal
+      } catch (error) {
+        console.error("Error al registrar el permiso:", error);
+        alert("Hubo un error al registrar el permiso.");
+      }
+    },
     openModal() {
       this.$refs.modal.open(); // Abre el modal cuando el botón es clickeado
     },
@@ -83,6 +87,9 @@ export default {
       this.$refs.modalDetalles.open(corte); // Abre el modal de detalles con datos
     },
   },
+  mounted() {
+    this.fetchCortes();
+  }
 };
 </script>
 

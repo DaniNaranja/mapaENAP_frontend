@@ -1,40 +1,48 @@
 <template>
-  <div class="home p-6">
+  <div class="home p-6 h-[calc(100vh-5rem)] overflow-hidden flex flex-col">
     <h1 class="text-2xl font-bold mb-6">Historial de cortes</h1>
 
-    <div class="space-y-4">
-      <div class="p-2 rounded-lg">
-        <div class="grid grid-cols-6 gap-4 font-bold text-black text-lg">
-          <div>Calle</div>
-          <div>Motivo</div>
-          <div>Inicio</div>
-          <div>Termino</div>
-          <div>Tipo</div>
+    <!-- Scrollable table section -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="space-y-4">
+        <!-- Table header -->
+        <div class="p-2 rounded-lg">
+          <div class="grid grid-cols-6 gap-4 font-bold text-black text-lg">
+            <div>ID</div>
+            <div>Calle</div>
+            <div>Motivo</div>
+            <div>Inicio</div>
+            <div>Termino</div>
+            <div>Tipo</div>
+          </div>
         </div>
-      </div>
 
-      <!-- Filas de datos -->
-      <div
-        v-for="corte in cortes"
-        :key="corte.id"
-        @click="openModal(corte)"
-        class="bg-slate-200 p-4 rounded-lg shadow-sm hover:bg-slate-300 transition-all duration-300 cursor-pointer"
-      >
-        <div class="grid grid-cols-6 gap-4 mt-2">
-          <div class="text-base text-gray-800">{{ corte.calle }}</div>
-          <div class="text-base text-gray-800 truncate">{{ corte.motivo }}</div>
-          <div class="text-base text-gray-800">{{ corte.inicio }}</div>
-          <div class="text-base text-gray-800">{{ corte.termino }}</div>
-          <div class="text-base">
-            <span
-              :class="{
-                'bg-red-500 text-white': corte.tipo === 'Total',
-                'bg-yellow-500 text-white': corte.tipo === 'Parcial',
-              }"
-              class="inline-block px-4 py-2 rounded-full text-base font-bold capitalize"
-            >
-              {{ corte.tipo }}
-            </span>
+        <!-- Scrollable table body -->
+        <div>
+          <div
+            v-for="corte in cortes"
+            :key="corte.id"
+            @click="openModal(corte)"
+            class="bg-slate-200 p-5 rounded-lg shadow-sm hover:bg-slate-300 transition-all duration-300 cursor-pointer mt-3"
+          >
+            <div class="grid grid-cols-6 gap-6">
+              <div class="text-base text-gray-800">{{ corte.id }}</div>
+              <div class="text-base text-gray-800">{{ corte.calle }}</div>
+              <div class="text-base text-gray-800 truncate">{{ corte.motivo }}</div>
+              <div class="text-base text-gray-800">{{ corte.inicio }}</div>
+              <div class="text-base text-gray-800">{{ corte.termino }}</div>
+              <div class="text-base">
+                <span
+                  :class="{
+                    'bg-red-500 text-white': corte.tipo === 'total',
+                    'bg-yellow-500 text-white': corte.tipo === 'parcial',
+                  }"
+                  class="inline-block px-4 py-2 rounded-full text-base font-bold capitalize"
+                >
+                  {{ corte.tipo }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -126,40 +134,46 @@
 </template>
 
 <script>
+import axios from "@/plugins/axios";
 import L from "leaflet";
 
 export default {
   name: "HistorialView",
   data() {
     return {
-      cortes: [
-        {
-          id: 1,
-          tipo: "Total",
-          calle: "Corte total en calle Principal",
-          latitud: -36.7793,
-          longitud: -73.1237,
-          inicio: "24-01-2025 15:30",
-          termino: "24-01-2025 20:00",
-          motivo: "Reparaciones en via x",
-        },
-        {
-          id: 2,
-          tipo: "Parcial",
-          calle: "Corte parcial en calle Secundaria",
-          latitud: -36.7800,
-          longitud: -73.1200,
-          inicio: "24-01-2025 15:00",
-          termino: "24-01-2025 20:00",
-          motivo: "Remoción de materiales",
-        },
-      ],
+      cortes: [],
       isModalVisible: false,
       selectedCorte: null,
       mapInstance: null, // Instancia del mapa
     };
   },
   methods: {
+
+    async fetchCortes() {
+  try {
+    // Retrieve the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      console.error("Token no encontrado. Por favor, inicie sesión.");
+      return;
+    }
+    
+    const response = await axios.get("http://localhost:3002/cortes", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    this.cortes = response.data;
+    this.cortes.sort((a, b) => b.id - a.id); // Descending order by ID
+
+  } catch (error) {
+    console.error("Error al obtener los cortes:", error);
+    if (error.response && error.response.status === 401) {
+      console.error("No autorizado. Verifique el token.");
+    }
+  }
+},
     openModal(corte) {
       this.selectedCorte = corte;
       this.isModalVisible = true;
@@ -200,5 +214,8 @@ export default {
         .openPopup();
     },
   },
+  mounted() {
+    this.fetchCortes();
+  }
 };
 </script>
