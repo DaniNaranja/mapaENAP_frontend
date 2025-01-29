@@ -23,8 +23,8 @@
       </div>
 
       <!-- Ejemplo de notificaciones -->
-      <NotificationCard v-for="(corte, index) in cortes" :key="index" :tipo="corte.tipo"
-        :calle="corte.calle" @click="openDetallesModal(corte)" />
+      <NotificationCard v-for="(corte, index) in cortes" :key="index" :tipo="corte.tipo" :calle="corte.calle"
+        @click="openDetallesModal(corte)" />
 
     </div>
 
@@ -42,6 +42,7 @@ import Modal from "@/components/ModalSolicitud.vue";
 import ModalDetalles from "@/components/ModalDetalle.vue"
 import NotificationCard from "@/components/NotificationCard.vue";
 import MapViewer from "@/components/MapViewer.vue";
+import moment from 'moment-timezone'
 
 export default {
   name: "HomeView",
@@ -61,7 +62,30 @@ export default {
     async fetchCortes() {
       try {
         const response = await axios.get("http://localhost:3002/cortes");
-        this.cortes = response.data;
+        const cortes = response.data;
+
+        // Filtrar los cortes por el día de hoy
+        const hoy = moment().tz('America/Santiago').startOf('day'); // Comienza desde las 00:00 del día de hoy
+        const finDelDia = moment().tz('America/Santiago').endOf('day'); // Finaliza a las 23:59:59 del día de hoy
+
+        // Filtrar los cortes para solo mostrar los de hoy
+        const cortesFiltrados = cortes.filter(corte => {
+          // Convertir las fechas de corte a objetos moment
+          const inicioFecha = moment(corte.inicio).tz('America/Santiago');
+          const terminoFecha = corte.termino ? moment(corte.termino).tz('America/Santiago') : null;
+
+          // Comprobar si la fecha de inicio o de término está dentro del rango de hoy
+          return (inicioFecha.isBetween(hoy, finDelDia, null, '[]')) ||
+            (terminoFecha && terminoFecha.isBetween(hoy, finDelDia, null, '[]'));
+        });
+
+        // Asignar los cortes filtrados
+        this.cortes = cortesFiltrados.map(corte => {
+          // Formatear las fechas a DD-MM-YYYY
+          corte.inicio = moment(corte.inicio).tz('America/Santiago').format('DD-MM-YYYY HH:mm:ss');
+          corte.termino = corte.termino ? moment(corte.termino).tz('America/Santiago').format('DD-MM-YYYY HH:mm:ss') : null;
+          return corte;
+        });
       } catch (error) {
         console.error("Error al obtener los cortes:", error);
       }

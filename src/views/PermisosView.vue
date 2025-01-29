@@ -49,7 +49,7 @@
           </div>
           <div class="flex justify-center items-center bg-gray-400 p-2 w-20 rounded-md">
             <button @click.stop="eliminarPermiso(permiso.id)"
-              class="text-red-600 hover:text-red-800 transition-all duration-300 p-2 rounded-full flex justify-center items-center">
+              class="text-slate-800 hover:text-red-800 transition-all duration-300 p-2 rounded-full flex justify-center items-center">
               <i class="fa-solid fa-trash-can text-2xl"></i>
             </button>
           </div>
