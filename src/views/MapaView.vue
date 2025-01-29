@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import moment from 'moment-timezone';
 import axios from "@/plugins/axios";
 import ModalRegistroCorte from "@/components/ModalRegistroCorte.vue";
 import ModalDetalles from "@/components/ModalDetalle.vue";
@@ -45,14 +46,45 @@ export default {
   },
   methods: {
 
-    async fetchCortes() {
-      try {
-        const response = await axios.get("http://localhost:3002/cortes");
-        this.cortes = response.data;
-      } catch (error) {
-        console.error("Error al obtener los cortes:", error);
-      }
-    },
+    convertirATemporal(fecha) {
+    if (!fecha) return null;
+    // Usar el formato DD-MM-YYYY para la fecha
+    return moment(fecha).tz('America/Santiago').format('DD-MM-YYYY HH:mm:ss');
+  },
+
+async fetchCortes() {
+  try {
+    const response = await axios.get("http://localhost:3002/cortes");
+    const cortes = response.data;
+
+    // Filtrar los cortes por el día de hoy
+    const hoy = moment().tz('America/Santiago').startOf('day'); // Comienza desde las 00:00 del día de hoy
+    const finDelDia = moment().tz('America/Santiago').endOf('day'); // Finaliza a las 23:59:59 del día de hoy
+
+    // Filtrar los cortes para solo mostrar los de hoy
+    const cortesFiltrados = cortes.filter(corte => {
+      // Convertir las fechas de corte a objetos moment
+      const inicioFecha = moment(corte.inicio).tz('America/Santiago');
+      const terminoFecha = corte.termino ? moment(corte.termino).tz('America/Santiago') : null;
+
+      // Comprobar si la fecha de inicio o de término está dentro del rango de hoy
+      return (inicioFecha.isBetween(hoy, finDelDia, null, '[]')) ||
+             (terminoFecha && terminoFecha.isBetween(hoy, finDelDia, null, '[]'));
+    });
+
+    // Asignar los cortes filtrados
+    this.cortes = cortesFiltrados.map(corte => {
+      // Formatear las fechas a DD-MM-YYYY
+      corte.inicio = moment(corte.inicio).tz('America/Santiago').format('DD-MM-YYYY HH:mm:ss');
+      corte.termino = corte.termino ? moment(corte.termino).tz('America/Santiago').format('DD-MM-YYYY HH:mm:ss') : null;
+      return corte;
+    });
+
+  } catch (error) {
+    console.error("Error al obtener los cortes:", error);
+  }
+},
+
     mostrarModal(coordenadas) {
       this.coordenadas = coordenadas;
       this.mostrarModalRegistro = true;
@@ -62,30 +94,41 @@ export default {
       this.coordenadas = null;
     },
     async registrarCorte(nuevoCorte) {
-      const token = localStorage.getItem('authToken');
-      axios.post('http://localhost:3002/cortes', nuevoCorte, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-        .then(response => {
-          console.log("Corte creado:", response.data);
-          this.cortes.push(response.data); // Añadir el nuevo corte a la lista
-        })
-        .catch(error => {
-          if (error.response) {
-            // Si la respuesta existe, accedemos a error.response.data
-            console.error("Error al crear el corte:", error.response.data);
-            // Aquí puedes agregar lógica para mostrar un mensaje de error amigable
-          } else if (error.request) {
-            // Si no hubo respuesta, significa que la solicitud fue enviada pero no se obtuvo respuesta
-            console.error("No se recibió respuesta del servidor:", error.request);
-          } else {
-            // Otros errores que no sean de la solicitud
-            console.error("Error en la configuración de la solicitud:", error.message);
-          }
-        });
-    },
+  const token = localStorage.getItem("authToken");
+
+  axios
+    .post("http://localhost:3002/cortes", nuevoCorte, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((response) => {
+      console.log("Corte creado:", response.data);
+
+      let nuevoCorte = response.data;
+
+      // Formatear las fechas antes de agregarlo a la lista
+      nuevoCorte.inicio = moment(nuevoCorte.inicio)
+        .tz("America/Santiago")
+        .format("DD-MM-YYYY HH:mm:ss");
+      nuevoCorte.termino = nuevoCorte.termino
+        ? moment(nuevoCorte.termino).tz("America/Santiago").format("DD-MM-YYYY HH:mm:ss")
+        : null;
+
+      // Añadir el nuevo corte a la lista
+      this.cortes.push(nuevoCorte);
+    })
+    .catch((error) => {
+      if (error.response) {
+        console.error("Error al crear el corte:", error.response.data);
+      } else if (error.request) {
+        console.error("No se recibió respuesta del servidor:", error.request);
+      } else {
+        console.error("Error en la configuración de la solicitud:", error.message);
+      }
+    });
+},
+
 
     openDetallesModal(corte) {
       this.$refs.modalDetalles.open(corte);

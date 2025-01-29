@@ -35,14 +35,7 @@
         type: String,
         required: true,
       },
-      latitud: {
-        type: String,
-        required: true,
-      },
-      longitud: {
-        type: String,
-        required: true,
-      },
+      
     },
     methods: {
       handleClick() {

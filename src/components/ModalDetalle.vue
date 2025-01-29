@@ -130,7 +130,7 @@ export default {
       }).addTo(this.map);
 
       const customIcon = L.icon({
-        iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png", // URL de tu marcador
+        iconUrl: this.corte.tipo === "total" ? "/marker_red.png" : "/marker_yellow.png",
         iconSize: [40, 40], // Tamaño del ícono
         iconAnchor: [20, 40], // Punto de anclaje
         popupAnchor: [0, -40], // Posición del popup respecto al marcador

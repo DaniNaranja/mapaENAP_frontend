@@ -27,7 +27,7 @@
           >
             <div class="grid grid-cols-6 gap-6">
               <div class="text-base text-gray-800">{{ corte.id }}</div>
-              <div class="text-base text-gray-800">{{ corte.calle }}</div>
+              <div class="text-base text-gray-800 truncate max-w-[150px]">{{ corte.calle }}</div>
               <div class="text-base text-gray-800 truncate">{{ corte.motivo }}</div>
               <div class="text-base text-gray-800">{{ corte.inicio }}</div>
               <div class="text-base text-gray-800">{{ corte.termino }}</div>
@@ -66,10 +66,10 @@
         <div
           :class="[
             'w-full p-2 border rounded mb-2',
-            selectedCorte.tipo === 'Total' ? 'bg-red-100 border-red-500' : 'bg-yellow-100 border-yellow-500'
+            selectedCorte.tipo === 'total' ? 'bg-red-100 border-red-500' : 'bg-yellow-100 border-yellow-500'
           ]"
         >
-          {{ selectedCorte.tipo === 'Total' ? 'Corte Total' : 'Corte Parcial' }}
+          {{ selectedCorte.tipo === 'total' ? 'Corte Total' : 'Corte Parcial' }}
         </div>
         <p class="mb-2">
           <strong>Calle:</strong>
@@ -134,6 +134,7 @@
 </template>
 
 <script>
+import moment from "moment-timezone";
 import axios from "@/plugins/axios";
 import L from "leaflet";
 
@@ -148,6 +149,12 @@ export default {
     };
   },
   methods: {
+
+    convertirATemporal(timestamp) {
+    if (!timestamp) return null;
+    // Usar el formato DD-MM-YYYY para la fecha
+    return moment(timestamp).tz('America/Santiago').format('DD-MM-YYYY HH:mm:ss');
+  },
 
     async fetchCortes() {
   try {
@@ -165,6 +172,10 @@ export default {
       }
     });
     this.cortes = response.data;
+    this.cortes.map((corte) => {
+      corte.inicio = this.convertirATemporal(corte.inicio);
+      corte.termino = this.convertirATemporal(corte.termino);
+    })
     this.cortes.sort((a, b) => b.id - a.id); // Descending order by ID
 
   } catch (error) {
@@ -196,7 +207,7 @@ export default {
     initMap(lat, lon, tipo) {
       this.mapInstance = L.map("map").setView([lat, lon], 16);
 
-      const iconUrl = tipo === "Total" ? "/marker_red.png" : "/marker_yellow.png";
+      const iconUrl = tipo === "total" ? "/marker_red.png" : "/marker_yellow.png";
       const customIcon = L.icon({
         iconUrl,
         iconSize: [45, 45],
