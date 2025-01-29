@@ -31,11 +31,11 @@
                 <span :class="{
                   'bg-red-500 text-white': corte.tipo === 'total',
                   'bg-yellow-500 text-white': corte.tipo === 'parcial',
-                }" class="inline-block px-4 py-2 rounded-full text-base font-bold capitalize">
+                }" class="inline-block px-8 py-2 rounded-full text-base font-bold capitalize">
                   {{ corte.tipo }}
                 </span>
               </div>
-              <div class="flex justify-center items-center bg-gray-400 p-2 w-20 rounded-md">
+              <div class="flex bg-gray-400 justify-center items-center p-2 w-20 rounded-md">
                 <button @click.stop="eliminarCorte(corte.id)"
                   class="text-slate-800 hover:text-red-800 transition-all duration-300 p-2 rounded-full flex justify-center items-center">
                   <i class="fa-solid fa-trash-can text-2xl"></i>

@@ -5,7 +5,7 @@
     <div class="space-y-4">
       <!-- Encabezado de la tabla -->
       <div class="p-2 rounded-lg">
-        <div class="grid grid-cols-7 gap-4 font-bold text-black text-lg">
+        <div class="grid grid-cols-7 gap-5 font-bold text-black text-lg">
           <div>ID</div>
           <div>Tipo</div>
           <div>Solicitante</div>
@@ -23,7 +23,7 @@
       <!-- Filas de datos -->
       <div v-else v-for="permiso in permisos" :key="permiso.id" @click="openModal(permiso)"
         class="bg-slate-200 p-4 rounded-lg shadow-sm hover:bg-slate-300 transition-all duration-300 cursor-pointer">
-        <div class="grid grid-cols-7 gap-4 mt-2">
+        <div class="grid grid-cols-7 gap-5 mt-2">
           <div class="text-base text-gray-800">{{ permiso.id }}</div>
           <div class="text-base">
             <span :class="{
