@@ -49,6 +49,10 @@
 
     <div v-if="isModalVisible" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div class="bg-white rounded-lg p-6 w-2/3 h-4/5 flex flex-col relative">
+        <button @click="closeModal" class="absolute top-4 right-4 text-2xl font-bold text-gray-600 hover:text-gray-800">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
         <h2 class="text-xl font-bold mb-4">Detalles</h2>
 
         <!-- Contenedor de texto y mapa -->
@@ -101,7 +105,8 @@
               <strong>Inicio:</strong>
             </p>
             <!-- Campo de texto para editar inicio -->
-            <input v-if="isEditing" v-model="selectedCorte.inicio" class="w-full p-2 border rounded mb-2" />
+            <input v-if="isEditing" v-model="selectedCorte.inicio" type="datetime-local"
+              class="w-full p-2 border rounded mb-2" />
             <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
               {{ selectedCorte.inicio }}
             </div>
@@ -110,7 +115,8 @@
               <strong>Termino:</strong>
             </p>
             <!-- Campo de texto para editar término -->
-            <input v-if="isEditing" v-model="selectedCorte.termino" class="w-full p-2 border rounded mb-2" />
+            <input v-if="isEditing" v-model="selectedCorte.termino" type="datetime-local"
+              class="w-full p-2 border rounded mb-2" />
             <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
               {{ selectedCorte.termino }}
             </div>
@@ -132,26 +138,16 @@
         </div>
 
         <!-- Botones de Edición y Guardado -->
-        <div class="flex justify-between items-center mt-4">
-          <!-- Botón para cerrar alineado a la izquierda -->
-          <button @click="closeModal" class="px-5 py-2 bg-gray-500 text-white rounded hover:bg-gray-700">
-            Cerrar
-          </button>
+        <button v-if="!isEditing" @click="startEditing"
+          class="absolute bottom-4 right-4 px-6 py-3 bg-blue-500 text-white rounded-lg text-lg hover:bg-blue-400">
+          Editar
+        </button>
 
-          <div class="flex space-x-4">
-            <!-- Botón para editar -->
-            <button v-if="!isEditing" @click="startEditing"
-              class="px-5 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
-              Editar
-            </button>
-
-            <!-- Botón para guardar -->
-            <button v-if="isEditing" @click="saveChanges"
-              class="px-5 py-2 bg-green-500 text-white rounded hover:bg-green-700">
-              Guardar
-            </button>
-          </div>
-        </div>
+        <!-- Botón para guardar -->
+        <button v-if="isEditing" @click="saveChanges"
+          class="absolute bottom-4 right-4 px-6 py-3 bg-green-500 text-white rounded-lg text-lg hover:bg-green-700">
+          Guardar
+        </button>
 
       </div>
     </div>

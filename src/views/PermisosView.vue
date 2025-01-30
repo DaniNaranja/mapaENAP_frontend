@@ -2,6 +2,7 @@
   <div class="home p-6">
     <h1 class="text-2xl font-bold mb-6">Permisos</h1>
 
+
     <div class="space-y-4">
       <!-- Encabezado de la tabla -->
       <div class="p-2 rounded-lg">
@@ -71,55 +72,70 @@
 
         <!-- Contenedor de texto -->
         <div class="w-2/3 pr-4 mb-3 overflow-y-scroll">
-          <h2 class="text-2xl font-bold mb-4">Detalle del Permiso</h2>
+          <div class="flex justify-between items-center mb-4">
+            <!-- Título -->
+            <h2 class="text-2xl font-bold">Detalle del Permiso</h2>
+
+            <!-- Botones de edición -->
+            <div class="flex space-x-4">
+              <button v-if="!isEditing" @click="startEditing"
+                class="px-5 py-2 bg-slate-500 text-white rounded hover:bg-blue-700">
+                Editar
+              </button>
+              <button v-if="isEditing" @click="saveChanges"
+                class="px-5 py-2 bg-slate-500 text-white rounded hover:bg-blue-700">
+                Guardar
+              </button>
+            </div>
+          </div>
+
+          <!-- Campo editable -->
           <p class="mb-2"><strong>ID:</strong></p>
           <div class="w-full p-2 border rounded bg-gray-200 mb-2">
             {{ selectedPermiso.id }}
           </div>
+
           <p class="mb-2"><strong>Tipo:</strong></p>
-          <div :class="[
-            'w-full p-2 border rounded mb-2',
-            selectedPermiso.tipo === 'total' ? 'bg-red-100 border-red-500' : 'bg-yellow-100 border-yellow-500'
-          ]">
-            {{ selectedPermiso.tipo === 'total' ? 'Corte Total' : 'Corte Parcial' }}
-          </div>
+          <select v-model="selectedPermiso.tipo" :disabled="!isEditing" class="w-full p-2 border rounded mb-2"
+            :class="selectedPermiso.tipo === 'total' ? 'bg-red-100 border-red-500' : 'bg-yellow-100 border-yellow-500'">
+            <option value="total">Corte Total</option>
+            <option value="parcial">Corte Parcial</option>
+          </select>
+
           <p class="mb-2"><strong>Solicitante:</strong></p>
-          <div class="w-full p-2 border rounded bg-gray-200 mb-2">
-            {{ selectedPermiso.solicitante }}
-          </div>
+          <input v-model="selectedPermiso.solicitante" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
+
           <p class="mb-2"><strong>Motivo:</strong></p>
-          <div class="w-full p-2 border rounded bg-gray-200 mb-2">
-            {{ selectedPermiso.motivo }}
-          </div>
+          <input v-model="selectedPermiso.motivo" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
+
           <p class="mb-2"><strong>Fecha:</strong></p>
-          <div class="w-full p-2 border rounded bg-gray-200 mb-2">
-            {{ selectedPermiso.fecha }}
-          </div>
+          <input v-model="selectedPermiso.fecha" type="date" :disabled="!isEditing"
+            class="w-full p-2 border rounded mb-2" />
+
           <p class="mb-2"><strong>Inicio:</strong></p>
-          <div class="w-full p-2 border rounded bg-gray-200 mb-2">
-            {{ selectedPermiso.inicio }}
-          </div>
-          <p class="mb-2"><strong>Termino:</strong></p>
-          <div class="w-full p-2 border rounded bg-gray-200 mb-2">
-            {{ selectedPermiso.termino }}
-          </div>
+          <input v-model="selectedPermiso.inicio" type="datetime-local" :disabled="!isEditing"
+            class="w-full p-2 border rounded mb-2" />
+
+          <p class="mb-2"><strong>Término:</strong></p>
+          <input v-model="selectedPermiso.termino" type="datetime-local" :disabled="!isEditing"
+            class="w-full p-2 border rounded mb-2" />
+
           <p class="mb-2"><strong>Calle:</strong></p>
-          <div class="w-full p-2 border rounded bg-gray-200 mb-2">
-            {{ selectedPermiso.calle }}
-          </div>
+          <input v-model="selectedPermiso.calle" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
+
           <p class="mb-2"><strong>Observación:</strong></p>
-          <div class="w-full p-2 border rounded bg-gray-200 mb-2">
-            {{ selectedPermiso.observacion }}
-          </div>
+          <textarea v-model="selectedPermiso.observacion" :disabled="!isEditing"
+            class="w-full p-2 border rounded mb-2"></textarea>
         </div>
 
         <!-- Contenedor del mapa -->
-        <div class="w-1/2 h-full rounded-xl  flex flex-col mt-6 ml-2">
+        <div class="w-1/2 h-full rounded-xl flex flex-col mt-6 ml-2">
           <!-- Mapa -->
           <div id="map" class="h-5/6 w-full rounded-xl"></div>
 
           <!-- Botones de Autorizar y Rechazar -->
-          <div class="flex justify-between mt-10">
+          <div v-if="selectedPermiso.estado === 'En revision' || isEditing"
+            class="flex justify-between mt-10">
             <button @click="autorizarPermiso"
               class="bg-green-500 text-white p-4 rounded-lg w-1/2 mr-2 hover:bg-green-600">
               Autorizar
@@ -128,9 +144,13 @@
               Rechazar
             </button>
           </div>
+
+          <!-- Botones de edición -->
+
         </div>
       </div>
     </div>
+
 
   </div>
 </template>
@@ -145,12 +165,69 @@ export default {
   name: "PermisosView",
   data() {
     return {
+      isEditing: false,
       permisos: [],
       isModalVisible: false,
       selectedPermiso: null,
     };
   },
   methods: {
+    startEditing() {
+      this.isEditing = true; // Cambiar el estado a modo de edición
+    },
+
+    async saveChanges() {
+      if (!this.selectedPermiso || !this.selectedPermiso.id) {
+        console.error("No hay un permiso seleccionado para actualizar.");
+        return;
+      }
+
+      const token = localStorage.getItem("authToken");
+
+      try {
+        // Crear un objeto con solo los campos modificados
+        const updatedData = {};
+
+        // Solo agrega las propiedades modificadas
+        if (this.selectedPermiso.tipo) updatedData.tipo = this.selectedPermiso.tipo;
+        if (this.selectedPermiso.fecha) updatedData.fecha = this.selectedPermiso.fecha;
+        if (this.selectedPermiso.solicitante) updatedData.solicitante = this.selectedPermiso.solicitante;
+        if (this.selectedPermiso.inicio) updatedData.inicio = this.selectedPermiso.inicio;
+        if (this.selectedPermiso.termino) updatedData.termino = this.selectedPermiso.termino;
+        if (this.selectedPermiso.calle) updatedData.calle = this.selectedPermiso.calle;
+        if (this.selectedPermiso.latitud) updatedData.latitud = this.selectedPermiso.latitud;
+        if (this.selectedPermiso.longitud) updatedData.longitud = this.selectedPermiso.longitud;
+        if (this.selectedPermiso.observacion) updatedData.observacion = this.selectedPermiso.observacion;
+        if (this.selectedPermiso.estado) updatedData.estado = this.selectedPermiso.estado;
+        if (this.selectedPermiso.motivo) updatedData.motivo = this.selectedPermiso.motivo;
+
+        const response = await axios.put(
+          `http://localhost:3002/permisos/${this.selectedPermiso.id}`,
+          updatedData, // Enviar solo los datos modificados
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          // Actualiza la lista de permisos en la UI
+          const index = this.permisos.findIndex(c => c.id === this.selectedPermiso.id);
+          if (index !== -1) {
+            this.permisos[index] = { ...this.selectedPermiso };
+          }
+
+          this.toast.success("Permiso actualizado correctamente");
+          this.isEditing = false; // Salir del modo edición
+        }
+      } catch (error) {
+        console.error("Error al actualizar el permiso:", error);
+        this.toast.error("Hubo un error al actualizar el permiso");
+      }
+    },
+
 
     convertirAFecha(fecha) {
       if (!fecha) return null;
@@ -166,46 +243,46 @@ export default {
 
 
     async fetchPermisos() {
-  try {
-    // Retrieve the token from localStorage
-    const token = localStorage.getItem('authToken');
+      try {
+        // Retrieve the token from localStorage
+        const token = localStorage.getItem('authToken');
 
-    if (!token) {
-      console.error("Token no encontrado. Por favor, inicie sesión.");
-      return;
-    }
+        if (!token) {
+          console.error("Token no encontrado. Por favor, inicie sesión.");
+          return;
+        }
 
-    const response = await axios.get("http://localhost:3002/permisos", {
-      headers: {
-        Authorization: `Bearer ${token}`
+        const response = await axios.get("http://localhost:3002/permisos", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        // Asegurarse de que la respuesta sea un array
+        this.permisos = Array.isArray(response.data) ? response.data : [];
+
+        // Si no hay permisos, establecer un mensaje
+        if (this.permisos.length === 0) {
+          console.log("No hay permisos disponibles.");
+        } else {
+          // Realizar conversiones a las fechas
+          this.permisos.map((permiso) => {
+            permiso.fecha = this.convertirAFecha(permiso.fecha);
+            permiso.inicio = this.convertirATemporal(permiso.inicio);
+            permiso.termino = this.convertirATemporal(permiso.termino);
+          });
+          this.permisos.sort((a, b) => b.id - a.id); // Descending order by ID
+        }
+
+      } catch (error) {
+        console.error("Error al obtener los permisos:", error);
+        if (error.response && error.response.status === 401) {
+          console.error("No autorizado. Verifique el token.");
+        }
+        // Asegurarse de que permisos sea un array vacío en caso de error
+        this.permisos = [];
       }
-    });
-
-    // Asegurarse de que la respuesta sea un array
-    this.permisos = Array.isArray(response.data) ? response.data : [];
-    
-    // Si no hay permisos, establecer un mensaje
-    if (this.permisos.length === 0) {
-      console.log("No hay permisos disponibles.");
-    } else {
-      // Realizar conversiones a las fechas
-      this.permisos.map((permiso) => {
-        permiso.fecha = this.convertirAFecha(permiso.fecha);
-        permiso.inicio = this.convertirATemporal(permiso.inicio);
-        permiso.termino = this.convertirATemporal(permiso.termino);
-      });
-      this.permisos.sort((a, b) => b.id - a.id); // Descending order by ID
-    }
-
-  } catch (error) {
-    console.error("Error al obtener los permisos:", error);
-    if (error.response && error.response.status === 401) {
-      console.error("No autorizado. Verifique el token.");
-    }
-    // Asegurarse de que permisos sea un array vacío en caso de error
-    this.permisos = [];
-  }
-},
+    },
 
 
 
@@ -330,26 +407,26 @@ export default {
     },
 
     async eliminarPermiso(id) {
-  const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('authToken');
 
-  try {
-    // Realizar el DELETE en la base de datos
-    const response = await axios.delete(`http://localhost:3002/permisos/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
+      try {
+        // Realizar el DELETE en la base de datos
+        const response = await axios.delete(`http://localhost:3002/permisos/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.status === 200) {
+          // Si la eliminación es exitosa, eliminar el permiso de la lista de Vue
+          this.permisos = this.permisos.filter(permiso => permiso.id !== id);
+          this.toast.success("Permiso eliminado correctamente");
+        }
+      } catch (error) {
+        console.error("Error al eliminar el permiso:", error);
+        this.toast.error("Hubo un error al eliminar el permiso");
       }
-    });
-
-    if (response.status === 200) {
-      // Si la eliminación es exitosa, eliminar el permiso de la lista de Vue
-      this.permisos = this.permisos.filter(permiso => permiso.id !== id);
-      this.toast.success("Permiso eliminado correctamente");
     }
-  } catch (error) {
-    console.error("Error al eliminar el permiso:", error);
-    this.toast.error("Hubo un error al eliminar el permiso");
-  }
-}
 
 
 
