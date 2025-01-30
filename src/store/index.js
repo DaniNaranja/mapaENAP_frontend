@@ -12,7 +12,7 @@ const store = createStore({
       state.isAuthenticated = !!token;
       if (token) {
         const decoded = JSON.parse(atob(token.split('.')[1]));
-        state.username = decoded.username || 'Usuario';
+        state.username = decoded.username || 'admin';
       } else {
         state.username = '';
       }

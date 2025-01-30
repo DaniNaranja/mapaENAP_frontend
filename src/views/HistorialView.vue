@@ -58,19 +58,26 @@
             <p class="mb-2">
               <strong>Tipo:</strong>
             </p>
-            <!-- Contenedor que cambia de color según el tipo de corte -->
-            <div :class="[
-              'w-full p-2 border rounded mb-2',
+            <!-- Dropdown para editar el tipo -->
+            <select v-if="isEditing" v-model="selectedCorte.tipo" class="w-full p-2 border rounded mb-2">
+              <option value="total">Corte Total</option>
+              <option value="parcial">Corte Parcial</option>
+            </select>
+            <div v-else class="w-full p-2 border rounded mb-2" :class="[
               selectedCorte.tipo === 'total' ? 'bg-red-100 border-red-500' : 'bg-yellow-100 border-yellow-500'
             ]">
               {{ selectedCorte.tipo === 'total' ? 'Corte Total' : 'Corte Parcial' }}
             </div>
+
             <p class="mb-2">
               <strong>Calle:</strong>
             </p>
-            <div class="w-full p-2 border rounded bg-gray-200 mb-2">
+            <!-- Campo de texto para editar calle -->
+            <input v-if="isEditing" v-model="selectedCorte.calle" class="w-full p-2 border rounded mb-2" />
+            <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
               {{ selectedCorte.calle }}
             </div>
+
             <div class="mb-4">
               <div class="flex space-x-4">
                 <!-- Latitud -->
@@ -89,22 +96,31 @@
                 </div>
               </div>
             </div>
+
             <p class="mb-2">
               <strong>Inicio:</strong>
             </p>
-            <div class="w-full p-2 border rounded bg-gray-200 mb-2">
+            <!-- Campo de texto para editar inicio -->
+            <input v-if="isEditing" v-model="selectedCorte.inicio" class="w-full p-2 border rounded mb-2" />
+            <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
               {{ selectedCorte.inicio }}
             </div>
+
             <p class="mb-2">
               <strong>Termino:</strong>
             </p>
-            <div class="w-full p-2 border rounded bg-gray-200 mb-2">
+            <!-- Campo de texto para editar término -->
+            <input v-if="isEditing" v-model="selectedCorte.termino" class="w-full p-2 border rounded mb-2" />
+            <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
               {{ selectedCorte.termino }}
             </div>
+
             <p class="mb-2">
               <strong>Motivo:</strong>
             </p>
-            <div class="w-full p-2 border rounded bg-gray-200 mb-2">
+            <!-- Campo de texto para editar motivo -->
+            <textarea v-if="isEditing" v-model="selectedCorte.motivo" class="w-full p-2 border rounded mb-2"></textarea>
+            <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
               {{ selectedCorte.motivo }}
             </div>
           </div>
@@ -115,13 +131,31 @@
           </div>
         </div>
 
-        <!-- Botón para cerrar -->
-        <button @click="closeModal"
-          class="absolute bottom-4 right-4 px-5 py-2 bg-gray-500 text-white rounded hover:bg-gray-700">
-          Cerrar
-        </button>
+        <!-- Botones de Edición y Guardado -->
+        <div class="flex justify-between items-center mt-4">
+          <!-- Botón para cerrar alineado a la izquierda -->
+          <button @click="closeModal" class="px-5 py-2 bg-gray-500 text-white rounded hover:bg-gray-700">
+            Cerrar
+          </button>
+
+          <div class="flex space-x-4">
+            <!-- Botón para editar -->
+            <button v-if="!isEditing" @click="startEditing"
+              class="px-5 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+              Editar
+            </button>
+
+            <!-- Botón para guardar -->
+            <button v-if="isEditing" @click="saveChanges"
+              class="px-5 py-2 bg-green-500 text-white rounded hover:bg-green-700">
+              Guardar
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
+
   </div>
 </template>
 
@@ -135,6 +169,7 @@ export default {
   name: "HistorialView",
   data() {
     return {
+      isEditing: false,
       cortes: [],
       isModalVisible: false,
       selectedCorte: null,
@@ -142,6 +177,53 @@ export default {
     };
   },
   methods: {
+    startEditing() {
+      this.isEditing = true; // Cambiar el estado a modo de edición
+    },
+
+    async saveChanges() {
+      if (!this.selectedCorte || !this.selectedCorte.id) {
+        console.error("No hay un corte seleccionado para actualizar.");
+        return;
+      }
+
+      const token = localStorage.getItem("authToken");
+
+      try {
+        const response = await axios.put(
+          `http://localhost:3002/cortes/${this.selectedCorte.id}`,
+          {
+            tipo: this.selectedCorte.tipo,
+            calle: this.selectedCorte.calle,
+            latitud: this.selectedCorte.latitud,
+            longitud: this.selectedCorte.longitud,
+            inicio: this.selectedCorte.inicio,
+            termino: this.selectedCorte.termino,
+            motivo: this.selectedCorte.motivo,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          // Actualiza la lista de cortes en la UI
+          const index = this.cortes.findIndex(c => c.id === this.selectedCorte.id);
+          if (index !== -1) {
+            this.cortes[index] = { ...this.selectedCorte };
+          }
+
+          this.toast.success("Corte actualizado correctamente");
+          this.isEditing = false; // Salir del modo edición
+        }
+      } catch (error) {
+        console.error("Error al actualizar el corte:", error);
+        this.toast.error("Hubo un error al actualizar el corte");
+      }
+    },
 
     async eliminarCorte(id) {
       const token = localStorage.getItem('authToken');
