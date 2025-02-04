@@ -27,6 +27,11 @@
                         <input type="text" v-model="form.solicitante" id="solicitante"
                             class="w-full p-2 border rounded bg-gray-200" required />
                     </div>
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-semibold mb-1">Correo electrónico</label>
+                        <input type="text" v-model="form.email" id="email"
+                            class="w-full p-2 border rounded bg-gray-200" required />
+                    </div>
 
                     <!-- Motivo -->
                     <div class="mb-4">
@@ -35,18 +40,17 @@
                             class="w-full p-2 border rounded bg-gray-200"></textarea>
                     </div>
 
-                    <!-- Fechas de inicio y termino -->
                     <div class="mb-4">
-                        <label for="inicio" class="block text-sm font-semibold mb-1">Inicio</label>
-                        <input type="datetime-local" v-model="form.inicio" id="inicio"
-                            class="w-full p-2 border rounded bg-gray-200" required />
+                        <label class="block text-sm font-semibold mb-1">Inicio y termino</label>
+                        <div class="flex">
+                            <input type="datetime-local" v-model="form.inicio" id="inicio"
+                                class="w-1/2 p-2 bg-gray-200 border rounded mr-2" required />
+                            <input type="datetime-local" v-model="form.termino" id="termino"
+                                class="w-1/2 p-2 bg-gray-200 border rounded"/>
+                        </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label for="termino" class="block text-sm font-semibold mb-1">Término</label>
-                        <input type="datetime-local" v-model="form.termino" id="termino"
-                            class="w-full p-2 border rounded bg-gray-200" required />
-                    </div>
+
 
                     <!-- Calle -->
                     <div class="mb-4">
@@ -167,7 +171,7 @@ export default {
 
         submitForm() {
             // Validar campos obligatorios
-            if (!this.form.tipo || !this.form.fecha || !this.form.solicitante || !this.form.motivo || !this.form.inicio || !this.form.termino || !this.form.calle || !this.form.latitud || !this.form.longitud) {
+            if (!this.form.tipo || !this.form.fecha || !this.form.solicitante || !this.form.motivo || !this.form.inicio || !this.form.termino || !this.form.calle || !this.form.latitud || !this.form.longitud || !this.form.email ) {
                 const toast = useToast();
                 toast.error("Por favor, complete todos los campos requeridos.", {
                     position: "bottom-right",

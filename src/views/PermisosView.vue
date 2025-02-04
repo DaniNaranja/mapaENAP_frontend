@@ -105,6 +105,9 @@
           <p class="mb-2"><strong>Solicitante:</strong></p>
           <input v-model="selectedPermiso.solicitante" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
 
+          <p class="mb-2"><strong>Correo electrónico:</strong></p>
+          <input v-model="selectedPermiso.email" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
+
           <p class="mb-2"><strong>Motivo:</strong></p>
           <input v-model="selectedPermiso.motivo" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
 
@@ -192,6 +195,7 @@ export default {
         if (this.selectedPermiso.tipo) updatedData.tipo = this.selectedPermiso.tipo;
         if (this.selectedPermiso.fecha) updatedData.fecha = this.selectedPermiso.fecha;
         if (this.selectedPermiso.solicitante) updatedData.solicitante = this.selectedPermiso.solicitante;
+        if (this.selectedPermiso.email) updatedData.correo = this.selectedPermiso.email;
         if (this.selectedPermiso.inicio) updatedData.inicio = this.selectedPermiso.inicio;
         if (this.selectedPermiso.termino) updatedData.termino = this.selectedPermiso.termino;
         if (this.selectedPermiso.calle) updatedData.calle = this.selectedPermiso.calle;
