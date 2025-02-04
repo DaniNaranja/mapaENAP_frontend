@@ -2,6 +2,25 @@
   <div class="home p-6 h-[calc(100vh-5rem)] overflow-hidden flex flex-col">
     <h1 class="text-2xl font-bold mb-6">Historial de cortes</h1>
 
+    <div class="flex justify-end space-x-4 mb-4">
+
+      <!-- Campo de búsqueda -->
+      <input v-model="searchQuery" type="text" placeholder="Buscar cortes por motivo, tipo o calle"
+        class="p-2 border rounded w-1/3">
+
+      <!-- Ordenar por -->
+      <select v-model="sortBy" class="p-2 border rounded">
+        <option value="id">ID</option>
+      </select>
+
+      <!-- Orden Ascendente/Descendente -->
+      <button @click="toggleSortOrder" class="py-2 px-4 border rounded bg-gray-200 flex items-center gap-2 w-40">
+        <i v-if="sortOrder === 'asc'" class=" fa-solid fa-arrow-up h-5 w-5 text-gray-700" />
+        <i v-else class="fa-solid fa-arrow-down h-5 w-5 text-gray-700"></i>
+        <span>{{ sortOrder === 'asc' ? 'Ascendente' : 'Descendente' }}</span>
+      </button>
+    </div>
+
     <!-- Scrollable table section -->
     <div class="flex-1 overflow-y-auto">
       <div class="space-y-4">
@@ -19,7 +38,7 @@
 
         <!-- Scrollable table body -->
         <div>
-          <div v-for="corte in cortes" :key="corte.id" @click="openModal(corte)"
+          <div v-for="corte in filteredAndSortedCortes" :key="corte.id" @click="openModal(corte)"
             class="bg-slate-200 p-5 rounded-lg shadow-sm hover:bg-slate-300 transition-all duration-300 cursor-pointer mt-3">
             <div class="grid grid-cols-7 gap-6">
               <div class="text-base text-gray-800">{{ corte.id }}</div>
@@ -170,9 +189,16 @@ export default {
       isModalVisible: false,
       selectedCorte: null,
       mapInstance: null, // Instancia del mapa
+      searchQuery: "",
+      sortBy: "id",
+      sortOrder: "desc",
     };
   },
   methods: {
+
+    toggleSortOrder() {
+      this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
+    },
     startEditing() {
       this.isEditing = true; // Cambiar el estado a modo de edición
     },
@@ -325,6 +351,30 @@ export default {
     toast() {
       return useToast();
     },
+
+    filteredAndSortedCortes() {
+    return this.cortes
+      .filter(corte => 
+        
+        corte.motivo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        corte.tipo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        corte.calle.toLowerCase().includes(this.searchQuery.toLowerCase())
+
+
+      )
+      .sort((a, b) => {
+      let valueA = a[this.sortBy];
+      let valueB = b[this.sortBy];
+
+      // Si estamos ordenando por "tipo", usamos una prioridad para "total" y "parcial"
+
+      if (this.sortOrder === "asc") {
+        return valueA > valueB ? 1 : -1;
+      } else {
+        return valueA < valueB ? 1 : -1;
+      }
+    });
+}
   },
 };
 </script>

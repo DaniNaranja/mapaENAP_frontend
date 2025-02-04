@@ -1,9 +1,29 @@
 <template>
-  <div class="home p-6">
+  <div class="home p-6 h-[calc(100vh-5rem)] overflow-hidden flex flex-col">
     <h1 class="text-2xl font-bold mb-6">Permisos</h1>
+    <div class="flex justify-end space-x-4 mb-4">
 
+      <!-- Campo de búsqueda -->
+      <input v-model="searchQuery" type="text" placeholder="Buscar permisos por solicitante, motivo, tipo o fecha..."
+        class="p-2 border rounded w-1/3">
 
-    <div class="space-y-4">
+      <!-- Ordenar por -->
+      <select v-model="sortBy" class="p-2 border rounded">
+        <option value="id">ID</option>
+        <option value="fecha">Fecha</option>
+        <option value="estado">Estado</option>
+      </select>
+
+      <!-- Orden Ascendente/Descendente -->
+      <button @click="toggleSortOrder" class="py-2 px-4 border rounded bg-gray-200 flex items-center gap-2 w-40">
+        <i v-if="sortOrder === 'asc'" class=" fa-solid fa-arrow-up h-5 w-5 text-gray-700" />
+        <i v-else class="fa-solid fa-arrow-down h-5 w-5 text-gray-700"></i>
+        <span>{{ sortOrder === 'asc' ? 'Ascendente' : 'Descendente' }}</span>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+      <div class="space-y-4">
       <!-- Encabezado de la tabla -->
       <div class="p-2 rounded-lg">
         <div class="grid grid-cols-7 gap-5 font-bold text-black text-lg">
@@ -22,7 +42,7 @@
       </div>
 
       <!-- Filas de datos -->
-      <div v-else v-for="permiso in permisos" :key="permiso.id" @click="openModal(permiso)"
+      <div v-else v-for="permiso in filteredAndSortedPermisos" :key="permiso.id" @click="openModal(permiso)"
         class="bg-slate-200 p-4 rounded-lg shadow-sm hover:bg-slate-300 transition-all duration-300 cursor-pointer">
         <div class="grid grid-cols-7 gap-5 mt-2">
           <div class="text-base text-gray-800">{{ permiso.id }}</div>
@@ -60,6 +80,8 @@
       </div>
 
     </div>
+    </div>
+    
 
     <!-- Modal -->
     <div v-if="isModalVisible" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
@@ -86,6 +108,11 @@
                 class="px-5 py-2 bg-slate-500 text-white rounded hover:bg-blue-700">
                 Guardar
               </button>
+              <button v-if="isEditing" @click="cancelEditing"
+                class="px-5 py-2 bg-red-500 text-white rounded hover:bg-red-700">
+                Cancelar
+              </button>
+
             </div>
           </div>
 
@@ -112,15 +139,19 @@
           <input v-model="selectedPermiso.motivo" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
 
           <p class="mb-2"><strong>Fecha:</strong></p>
-          <input v-model="selectedPermiso.fecha" type="date" :disabled="!isEditing"
+          <p  v-if="!isEditing" class="w-full p-2 border rounded  mb-2"> {{ selectedPermiso.fecha }}</p>
+          <input v-else v-model="selectedPermiso.fecha" type="date" :disabled="!isEditing"
             class="w-full p-2 border rounded mb-2" />
 
           <p class="mb-2"><strong>Inicio:</strong></p>
-          <input v-model="selectedPermiso.inicio" type="datetime-local" :disabled="!isEditing"
+          <p  v-if="!isEditing" class="w-full p-2 border rounded mb-2"> {{ selectedPermiso.inicio }}</p>
+          <input v-else v-model="selectedPermiso.inicio" type="datetime-local" :disabled="!isEditing"
             class="w-full p-2 border rounded mb-2" />
 
           <p class="mb-2"><strong>Término:</strong></p>
-          <input v-model="selectedPermiso.termino" type="datetime-local" :disabled="!isEditing"
+          <p  v-if="!isEditing" class="w-full p-2 border rounded mb-2"> {{ selectedPermiso.termino }}</p>
+
+          <input v-else v-model="selectedPermiso.termino" type="datetime-local" :disabled="!isEditing"
             class="w-full p-2 border rounded mb-2" />
 
           <p class="mb-2"><strong>Calle:</strong></p>
@@ -137,8 +168,7 @@
           <div id="map" class="h-5/6 w-full rounded-xl"></div>
 
           <!-- Botones de Autorizar y Rechazar -->
-          <div v-if="selectedPermiso.estado === 'En revision' || isEditing"
-            class="flex justify-between mt-10">
+          <div v-if="selectedPermiso.estado === 'En revision' || isEditing" class="flex justify-between mt-10">
             <button @click="autorizarPermiso"
               class="bg-green-500 text-white p-4 rounded-lg w-1/2 mr-2 hover:bg-green-600">
               Autorizar
@@ -169,15 +199,31 @@ export default {
   data() {
     return {
       isEditing: false,
+      originalPermiso: null,
       permisos: [],
       isModalVisible: false,
       selectedPermiso: null,
+      searchQuery: "",
+      sortBy: "id",
+      sortOrder: "desc",
     };
   },
   methods: {
-    startEditing() {
-      this.isEditing = true; // Cambiar el estado a modo de edición
+
+    toggleSortOrder() {
+      this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
     },
+    startEditing() {
+      this.isEditing = true;
+      this.originalPermiso = JSON.parse(JSON.stringify(this.selectedPermiso)); // Cambiar el estado a modo de edición
+    },
+    cancelEditing() {
+      if (this.originalPermiso) {
+        this.selectedPermiso = JSON.parse(JSON.stringify(this.originalPermiso)); // Restaura los valores originales
+      }
+      this.isEditing = false; // Sale del modo edición
+    },
+
 
     async saveChanges() {
       if (!this.selectedPermiso || !this.selectedPermiso.id) {
@@ -195,7 +241,7 @@ export default {
         if (this.selectedPermiso.tipo) updatedData.tipo = this.selectedPermiso.tipo;
         if (this.selectedPermiso.fecha) updatedData.fecha = this.selectedPermiso.fecha;
         if (this.selectedPermiso.solicitante) updatedData.solicitante = this.selectedPermiso.solicitante;
-        if (this.selectedPermiso.email) updatedData.correo = this.selectedPermiso.email;
+        if (this.selectedPermiso.email) updatedData.email = this.selectedPermiso.email;
         if (this.selectedPermiso.inicio) updatedData.inicio = this.selectedPermiso.inicio;
         if (this.selectedPermiso.termino) updatedData.termino = this.selectedPermiso.termino;
         if (this.selectedPermiso.calle) updatedData.calle = this.selectedPermiso.calle;
@@ -225,6 +271,7 @@ export default {
 
           this.toast.success("Permiso actualizado correctamente");
           this.isEditing = false; // Salir del modo edición
+          this.originalPermiso = null;
         }
       } catch (error) {
         console.error("Error al actualizar el permiso:", error);
@@ -292,12 +339,16 @@ export default {
 
 
     openModal(permiso) {
-      this.selectedPermiso = permiso;
+      this.selectedPermiso = { ...permiso };
+
       this.isModalVisible = true;
+
       this.$nextTick(() => {
         this.initMap(permiso.latitud, permiso.longitud, permiso.tipo);
       });
     },
+
+
     closeModal() {
       this.isModalVisible = false;
       this.selectedPermiso = null;
@@ -442,6 +493,35 @@ export default {
     toast() {
       return useToast();
     },
+    filteredAndSortedPermisos() {
+      return this.permisos
+        .filter(permiso =>
+          permiso.solicitante.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          permiso.motivo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          permiso.tipo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          permiso.fecha.toLowerCase().includes(this.searchQuery.toLowerCase())
+
+
+        )
+        .sort((a, b) => {
+          let valueA = a[this.sortBy];
+          let valueB = b[this.sortBy];
+
+          // Si estamos ordenando por fecha, convertir a Date
+          if (this.sortBy === "fecha") {
+            valueA = new Date(a.fecha.split('-').reverse().join('-')); // Convierte "DD-MM-YYYY" a "YYYY-MM-DD"
+            valueB = new Date(b.fecha.split('-').reverse().join('-'));
+          }
+
+          if (this.sortOrder === "asc") {
+            return valueA > valueB ? 1 : -1;
+          } else {
+            return valueA < valueB ? 1 : -1;
+          }
+        });
+    }
+
+
   },
 };
 </script>
