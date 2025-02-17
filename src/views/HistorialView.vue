@@ -259,13 +259,12 @@ export default {
         });
 
         if (response.status === 200) {
-          // Si la eliminación es exitosa, eliminar el permiso de la lista de Vue
           this.cortes = this.cortes.filter(corte => corte.id !== id);
-          this.toast.success("Permiso eliminado correctamente");
+          this.toast.success("Corte eliminado correctamente");
         }
       } catch (error) {
-        console.error("Error al eliminar el permiso:", error);
-        this.toast.error("Hubo un error al eliminar el permiso");
+        console.error("Error al eliminar el corte:", error);
+        this.toast.error("Hubo un error al eliminar el corte");
       }
     },
 
@@ -324,25 +323,66 @@ export default {
       }
     },
     initMap(lat, lon, tipo) {
-      this.mapInstance = L.map("map").setView([lat, lon], 16);
+  // Asegurarse de que el contenedor existe y se haya renderizado
+  this.$nextTick(() => {
+    const mapContainer = document.getElementById("map");
 
-      const iconUrl = tipo === "total" ? "/marker_red.png" : "/marker_yellow.png";
-      const customIcon = L.icon({
-        iconUrl,
-        iconSize: [45, 45],
-        iconAnchor: [19, 38],
-        popupAnchor: [0, -38],
-      });
+    if (!mapContainer) {
+      console.error("No se encontró el contenedor del mapa.");
+      return;
+    }
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(this.mapInstance);
+    // Evitar recrear el mapa si ya existe
+    if (this.mapInstance) {
+      return;
+    }
 
-      L.marker([lat, lon], { icon: customIcon })
-        .addTo(this.mapInstance)
-        .bindPopup("Ubicación del corte")
-        .openPopup();
-    },
+    // Modificar el prototipo de L.Marker si no se ha hecho antes
+    if (!L.Marker.prototype._animateZoom) {
+      L.Marker.prototype._animateZoom = function (opt) {
+        if (!this._map) {
+          return;
+        }
+        const pos = this._map._latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center).round();
+        this._setPos(pos);
+      };
+    }
+
+    // Inicializar el mapa en el contenedor
+    this.mapInstance = L.map(mapContainer).setView([lat, lon], 16);
+
+    const iconUrl = tipo === "total" ? "/marker_red.png" : "/marker_yellow.png";
+    const customIcon = L.icon({
+      iconUrl,
+      iconSize: [45, 45],
+      iconAnchor: [19, 38],
+      popupAnchor: [0, -38],
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(this.mapInstance);
+
+    const marker = L.marker([lat, lon], { icon: customIcon })
+      .addTo(this.mapInstance)
+      .bindPopup("Ubicación del corte");
+
+    // Asegurarse de que el marcador se mantenga en su lugar
+    this.mapInstance.on("zoomend", () => {
+      marker.setLatLng([lat, lon]); // Reposicionar marcador al hacer zoom
+    });
+
+    this.mapInstance.on("moveend", () => {
+      marker.setLatLng([lat, lon]); // Reposicionar marcador al mover el mapa
+    });
+
+    this.mapInstance.on("popupclose", () => {
+      marker.setLatLng([lat, lon]); // Asegurar que el marcador no se pierda después de cerrar el popup
+    });
+  });
+}
+
+
   },
   mounted() {
     this.fetchCortes();

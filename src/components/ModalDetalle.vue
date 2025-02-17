@@ -118,29 +118,49 @@ export default {
       }
     },
     initializeMap() {
-      this.map = L.map("details-map").setView(
-        [this.corte.latitud, this.corte.longitud],
-        16
-      );
+    if (this.map) {
+      this.map.remove(); // Elimina el mapa anterior si existe
+    }
 
-      // Capa base de OpenStreetMap
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(this.map);
+    this.map = L.map("details-map").setView(
+      [this.corte.latitud, this.corte.longitud],
+      16
+    );
 
-      const customIcon = L.icon({
-        iconUrl: this.corte.tipo === "total" ? "/marker_red.png" : "/marker_yellow.png",
-        iconSize: [40, 40], // Tamaño del ícono
-        iconAnchor: [20, 40], // Punto de anclaje
-        popupAnchor: [0, -40], // Posición del popup respecto al marcador
-      });
+    // Modificar el prototipo para evitar el error de zoom
+    L.Marker.prototype._animateZoom = function (opt) {
+      if (!this._map) return;
+      const pos = this._map._latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center).round();
+      this._setPos(pos);
+    };
 
-      // Añadir el marcador personalizado
-      this.marker = L.marker([this.corte.latitud, this.corte.longitud], {
-        icon: customIcon, // Usar el ícono personalizado
-      }).addTo(this.map);
-    },
+    // Capa base de OpenStreetMap
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(this.map);
+
+    const customIcon = L.icon({
+      iconUrl: this.corte.tipo === "total" ? "/marker_red.png" : "/marker_yellow.png",
+      iconSize: [40, 40], // Tamaño del ícono
+      iconAnchor: [20, 40], // Punto de anclaje
+      popupAnchor: [0, -40], // Posición del popup respecto al marcador
+    });
+
+    // Añadir el marcador
+    this.marker = L.marker([this.corte.latitud, this.corte.longitud], {
+      icon: customIcon,
+    }).addTo(this.map);
+
+    // Manejar zoom y movimiento para actualizar el marcador
+    this.map.on("zoomend", () => this.updateMarker());
+    this.map.on("moveend", () => this.updateMarker());
+  },
+  updateMarker() {
+    if (this.marker) {
+      this.marker.setLatLng([this.corte.latitud, this.corte.longitud]);
+    }
+  },
   },
 };
 </script>

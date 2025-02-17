@@ -1,11 +1,11 @@
 <template>
   <div class="home p-6 h-[calc(100vh-5rem)] overflow-hidden flex flex-col">
-    <h1 class="text-2xl font-bold mb-6">Historial de cortes</h1>
+    <h1 class="text-2xl font-bold mb-6">Historial uso de grifos</h1>
 
     <div class="flex justify-end space-x-4 mb-4">
 
       <!-- Campo de búsqueda -->
-      <input v-model="searchQuery" type="text" placeholder="Buscar cortes por motivo, tipo o calle"
+      <input v-model="searchQuery" type="text" placeholder="Buscar uso de grifos por motivo, tipo o numero de grifo"
         class="p-2 border rounded w-1/3">
 
       <!-- Ordenar por -->
@@ -38,24 +38,24 @@
 
         <!-- Scrollable table body -->
         <div>
-          <div v-for="corte in filteredAndSortedCortes" :key="corte.id" @click="openModal(corte)"
+          <div v-for="usoGrifo in filteredAndSortedUsosGrifos" :key="usoGrifo.id" @click="openModal(usoGrifo)"
             class="bg-slate-200 p-5 rounded-lg shadow-sm hover:bg-slate-300 transition-all duration-300 cursor-pointer mt-3">
             <div class="grid grid-cols-7 gap-6">
-              <div class="text-base text-gray-800">{{ corte.id }}</div>
-              <div class="text-base text-gray-800 truncate max-w-[150px]">{{ corte.calle }}</div>
-              <div class="text-base text-gray-800 truncate">{{ corte.motivo }}</div>
-              <div class="text-base text-gray-800">{{ corte.inicio }}</div>
-              <div class="text-base text-gray-800">{{ corte.termino }}</div>
+              <div class="text-base text-gray-800">{{ usoGrifo.id }}</div>
+              <div class="text-base text-gray-800 truncate max-w-[150px]">{{ usoGrifo.numero_grifo }}</div>
+              <div class="text-base text-gray-800 truncate">{{ usoGrifo.motivo }}</div>
+              <div class="text-base text-gray-800">{{ usoGrifo.inicio }}</div>
+              <div class="text-base text-gray-800">{{ usoGrifo.termino }}</div>
               <div class="text-base">
                 <span :class="{
-                  'bg-red-500 text-white': corte.tipo === 'total',
-                  'bg-yellow-500 text-white': corte.tipo === 'parcial',
-                }" class="inline-block px-8 py-2 rounded-full text-base font-bold capitalize">
-                  {{ corte.tipo }}
+                  'bg-blue-500 text-white': usoGrifo.tipo === 'Con bomba',
+                  'bg-green-500 text-white': usoGrifo.tipo === 'Sin bomba',
+                }" class="inline-block px-8 py-2 rounded-full text-base font-bold">
+                  {{ usoGrifo.tipo }}
                 </span>
               </div>
               <div class="flex bg-gray-400 justify-center items-center p-2 w-20 rounded-md">
-                <button @click.stop="eliminarCorte(corte.id)"
+                <button @click.stop="eliminarUsoGrifo(usoGrifo.id)"
                   class="text-slate-800 hover:text-red-800 transition-all duration-300 p-2 rounded-full flex justify-center items-center">
                   <i class="fa-solid fa-trash-can text-2xl"></i>
                 </button>
@@ -82,23 +82,23 @@
               <strong>Tipo:</strong>
             </p>
             <!-- Dropdown para editar el tipo -->
-            <select v-if="isEditing" v-model="selectedCorte.tipo" class="w-full p-2 border rounded mb-2">
-              <option value="total">Corte Total</option>
-              <option value="parcial">Corte Parcial</option>
+            <select v-if="isEditing" v-model="selectedUsoGrifo.tipo" class="w-full p-2 border rounded mb-2">
+              <option value="Con bomba">Con bomba</option>
+              <option value="Sin bomba">Sin bomba</option>
             </select>
             <div v-else class="w-full p-2 border rounded mb-2" :class="[
-              selectedCorte.tipo === 'total' ? 'bg-red-100 border-red-500' : 'bg-yellow-100 border-yellow-500'
+              selectedUsoGrifo.tipo === 'Con bomba' ? 'bg-blue-100 border-blue-500' : 'bg-green-100 border-green-500'
             ]">
-              {{ selectedCorte.tipo === 'total' ? 'Corte Total' : 'Corte Parcial' }}
+              {{ selectedUsoGrifo.tipo === 'Con bomba' ? 'Con bomba' : 'Sin bomba' }}
             </div>
 
             <p class="mb-2">
-              <strong>Calle:</strong>
+              <strong>Numero de grifo (ubicación):</strong>
             </p>
             <!-- Campo de texto para editar calle -->
-            <input v-if="isEditing" v-model="selectedCorte.calle" class="w-full p-2 border rounded mb-2" />
+            <input v-if="isEditing" v-model="selectedUsoGrifo.numero_grifo" class="w-full p-2 border rounded mb-2" />
             <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
-              {{ selectedCorte.calle }}
+              {{ selectedUsoGrifo.numero_grifo }}
             </div>
 
             <div class="mb-4">
@@ -107,14 +107,14 @@
                 <div class="flex-1">
                   <label class="block text-sm font-semibold mb-1">Latitud</label>
                   <div class="p-2 border rounded bg-gray-200 mb-2">
-                    {{ selectedCorte.latitud }}
+                    {{ selectedUsoGrifo.latitud }}
                   </div>
                 </div>
                 <!-- Longitud -->
                 <div class="flex-1">
                   <label class="block text-sm font-semibold mb-1">Longitud</label>
                   <div class="p-2 border rounded bg-gray-200 mb-2">
-                    {{ selectedCorte.longitud }}
+                    {{ selectedUsoGrifo.longitud }}
                   </div>
                 </div>
               </div>
@@ -124,29 +124,29 @@
               <strong>Inicio:</strong>
             </p>
             <!-- Campo de texto para editar inicio -->
-            <input v-if="isEditing" v-model="selectedCorte.inicio" type="datetime-local"
+            <input v-if="isEditing" v-model="selectedUsoGrifo.inicio" type="datetime-local"
               class="w-full p-2 border rounded mb-2" />
             <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
-              {{ selectedCorte.inicio }}
+              {{ selectedUsoGrifo.inicio }}
             </div>
 
             <p class="mb-2">
               <strong>Termino:</strong>
             </p>
             <!-- Campo de texto para editar término -->
-            <input v-if="isEditing" v-model="selectedCorte.termino" type="datetime-local"
+            <input v-if="isEditing" v-model="selectedUsoGrifo.termino" type="datetime-local"
               class="w-full p-2 border rounded mb-2" />
             <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
-              {{ selectedCorte.termino }}
+              {{ selectedUsoGrifo.termino }}
             </div>
 
             <p class="mb-2">
               <strong>Motivo:</strong>
             </p>
             <!-- Campo de texto para editar motivo -->
-            <textarea v-if="isEditing" v-model="selectedCorte.motivo" class="w-full p-2 border rounded mb-2"></textarea>
+            <textarea v-if="isEditing" v-model="selectedUsoGrifo.motivo" class="w-full p-2 border rounded mb-2"></textarea>
             <div v-else class="w-full p-2 border rounded bg-gray-200 mb-2">
-              {{ selectedCorte.motivo }}
+              {{ selectedUsoGrifo.motivo }}
             </div>
           </div>
 
@@ -185,9 +185,9 @@ export default {
   data() {
     return {
       isEditing: false,
-      cortes: [],
+      usosGrifos: [],
       isModalVisible: false,
-      selectedCorte: null,
+      selectedUsoGrifo: null,
       mapInstance: null, // Instancia del mapa
       searchQuery: "",
       sortBy: "id",
@@ -204,8 +204,8 @@ export default {
     },
 
     async saveChanges() {
-      if (!this.selectedCorte || !this.selectedCorte.id) {
-        console.error("No hay un corte seleccionado para actualizar.");
+      if (!this.selectedUsoGrifo || !this.selectedUsoGrifo.id) {
+        console.error("No hay un usoGrifo seleccionado para actualizar.");
         return;
       }
 
@@ -213,15 +213,15 @@ export default {
 
       try {
         const response = await axios.put(
-          `http://localhost:3002/cortes/${this.selectedCorte.id}`,
+          `http://localhost:3002/usosGrifos/${this.selectedUsoGrifo.id}`,
           {
-            tipo: this.selectedCorte.tipo,
-            calle: this.selectedCorte.calle,
-            latitud: this.selectedCorte.latitud,
-            longitud: this.selectedCorte.longitud,
-            inicio: this.selectedCorte.inicio,
-            termino: this.selectedCorte.termino,
-            motivo: this.selectedCorte.motivo,
+            tipo: this.selectedUsoGrifo.tipo,
+            numero_grifo: this.selectedUsoGrifo.numero_grifo,
+            latitud: this.selectedUsoGrifo.latitud,
+            longitud: this.selectedUsoGrifo.longitud,
+            inicio: this.selectedUsoGrifo.inicio,
+            termino: this.selectedUsoGrifo.termino,
+            motivo: this.selectedUsoGrifo.motivo,
           },
           {
             headers: {
@@ -232,27 +232,27 @@ export default {
         );
 
         if (response.status === 200) {
-          // Actualiza la lista de cortes en la UI
-          const index = this.cortes.findIndex(c => c.id === this.selectedCorte.id);
+          // Actualiza la lista de usoGrifos en la UI
+          const index = this.usosGrifos.findIndex(c => c.id === this.selectedUsoGrifo.id);
           if (index !== -1) {
-            this.cortes[index] = { ...this.selectedCorte };
+            this.usosGrifos[index] = { ...this.selectedUsoGrifo };
           }
 
-          this.toast.success("Corte actualizado correctamente");
+          this.toast.success("Uso de grifo actualizado correctamente");
           this.isEditing = false; // Salir del modo edición
         }
       } catch (error) {
-        console.error("Error al actualizar el corte:", error);
-        this.toast.error("Hubo un error al actualizar el corte");
+        console.error("Error al actualizar el uso de grifo:", error);
+        this.toast.error("Hubo un error al actualizar el uso de grifo");
       }
     },
 
-    async eliminarCorte(id) {
+    async eliminarUsoGrifo(id) {
       const token = localStorage.getItem('authToken');
 
       try {
         // Realizar el DELETE en la base de datos
-        const response = await axios.delete(`http://localhost:3002/cortes/${id}`, {
+        const response = await axios.delete(`http://localhost:3002/usosGrifos/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -260,12 +260,12 @@ export default {
 
         if (response.status === 200) {
           // Si la eliminación es exitosa, eliminar el permiso de la lista de Vue
-          this.cortes = this.cortes.filter(corte => corte.id !== id);
-          this.toast.success("Permiso eliminado correctamente");
+          this.usosGrifos = this.usosGrifos.filter(usoGrifo => usoGrifo.id !== id);
+          this.toast.success("Uso de grifo eliminado correctamente");
         }
       } catch (error) {
-        console.error("Error al eliminar el permiso:", error);
-        this.toast.error("Hubo un error al eliminar el permiso");
+        console.error("Error al eliminar el uso de grifo:", error);
+        this.toast.error("Hubo un error al eliminar el uso de grifo");
       }
     },
 
@@ -275,7 +275,7 @@ export default {
       return moment(timestamp).tz('America/Santiago').format('DD-MM-YYYY HH:mm:ss');
     },
 
-    async fetchCortes() {
+    async fetchUsosGrifos() {
       try {
         // Retrieve the token from localStorage
         const token = localStorage.getItem('authToken');
@@ -285,38 +285,38 @@ export default {
           return;
         }
 
-        const response = await axios.get("http://localhost:3002/cortes", {
+        const response = await axios.get("http://localhost:3002/usosGrifos", {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        this.cortes = response.data;
-        this.cortes.map((corte) => {
-          corte.inicio = this.convertirATemporal(corte.inicio);
-          corte.termino = this.convertirATemporal(corte.termino);
+        this.usosGrifos = response.data;
+        this.usosGrifos.map((usoGrifo) => {
+          usoGrifo.inicio = this.convertirATemporal(usoGrifo.inicio);
+          usoGrifo.termino = this.convertirATemporal(usoGrifo.termino);
         })
-        this.cortes.sort((a, b) => b.id - a.id); // Descending order by ID
+        this.usosGrifos.sort((a, b) => b.id - a.id); // Descending order by ID
 
       } catch (error) {
-        console.error("Error al obtener los cortes:", error);
+        console.error("Error al obtener los usos de grifos:", error);
         if (error.response && error.response.status === 401) {
           console.error("No autorizado. Verifique el token.");
         }
       }
     },
-    openModal(corte) {
-      this.selectedCorte = corte;
+    openModal(usoGrifo) {
+      this.selectedUsoGrifo = usoGrifo;
       this.isModalVisible = true;
 
       this.$nextTick(() => {
         if (!this.mapInstance) {
-          this.initMap(corte.latitud, corte.longitud, corte.tipo);
+          this.initMap(usoGrifo.latitud, usoGrifo.longitud, usoGrifo.tipo);
         }
       });
     },
     closeModal() {
       this.isModalVisible = false;
-      this.selectedCorte = null;
+      this.selectedUsoGrifo = null;
 
       if (this.mapInstance) {
         this.mapInstance.remove(); // Destruye el mapa para evitar conflictos
@@ -326,7 +326,7 @@ export default {
     initMap(lat, lon, tipo) {
       this.mapInstance = L.map("map").setView([lat, lon], 16);
 
-      const iconUrl = tipo === "total" ? "/marker_red.png" : "/marker_yellow.png";
+      const iconUrl = tipo === "Con bomba" ? "/grifo_bomba.png" : "/grifo_sinbomba.png";
       const customIcon = L.icon({
         iconUrl,
         iconSize: [45, 45],
@@ -340,25 +340,25 @@ export default {
 
       L.marker([lat, lon], { icon: customIcon })
         .addTo(this.mapInstance)
-        .bindPopup("Ubicación del corte")
-        .openPopup();
+        .bindPopup("Ubicación del grifo")
+        //Revisar error leaflet tras cerrar pop up
     },
   },
   mounted() {
-    this.fetchCortes();
+    this.fetchUsosGrifos();
   },
   computed: {
     toast() {
       return useToast();
     },
 
-    filteredAndSortedCortes() {
-    return this.cortes
-      .filter(corte => 
+    filteredAndSortedUsosGrifos() {
+    return this.usosGrifos
+      .filter(usoGrifo => 
         
-        corte.motivo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        corte.tipo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        corte.calle.toLowerCase().includes(this.searchQuery.toLowerCase())
+        usoGrifo.motivo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        usoGrifo.tipo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        usoGrifo.numero_grifo.toLowerCase().includes(this.searchQuery.toLowerCase())
 
 
       )

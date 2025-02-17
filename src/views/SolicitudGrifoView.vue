@@ -1,10 +1,10 @@
 <template>
   <div class="home p-6 h-[calc(100vh-5rem)] overflow-hidden flex flex-col">
-    <h1 class="text-2xl font-bold mb-6">Permisos</h1>
+    <h1 class="text-2xl font-bold mb-6">Permisos de uso de grifos</h1>
     <div class="flex justify-end space-x-4 mb-4">
 
       <!-- Campo de búsqueda -->
-      <input v-model="searchQuery" type="text" placeholder="Buscar permisos por solicitante, motivo, tipo o fecha..."
+      <input v-model="searchQuery" type="text" placeholder="Buscar permisosGrifos por solicitante, motivo, tipo o fecha..."
         class="p-2 border rounded w-1/3">
 
       <!-- Ordenar por -->
@@ -36,40 +36,40 @@
         </div>
       </div>
 
-      <!-- Mostrar mensaje si no hay permisos -->
-      <div v-if="permisos.length === 0" class="text-center text-gray-500 p-4">
-        No hay permisos registrados.
+      <!-- Mostrar mensaje si no hay permisosGrifos -->
+      <div v-if="permisosGrifos.length === 0" class="text-center text-gray-500 p-4">
+        No hay permisos de uso de grifo registrados.
       </div>
 
       <!-- Filas de datos -->
-      <div v-else v-for="permiso in filteredAndSortedPermisos" :key="permiso.id" @click="openModal(permiso)"
+      <div v-else v-for="permisoGrifo in filteredAndSortedPermisosGrifos" :key="permisoGrifo.id" @click="openModal(permisoGrifo)"
         class="bg-slate-200 p-4 rounded-lg shadow-sm hover:bg-slate-300 transition-all duration-300 cursor-pointer">
         <div class="grid grid-cols-7 gap-5 mt-2">
-          <div class="text-base text-gray-800">{{ permiso.id }}</div>
+          <div class="text-base text-gray-800">{{ permisoGrifo.id }}</div>
           <div class="text-base">
             <span :class="{
-              'bg-red-500 text-white': permiso.tipo === 'total',
-              'bg-yellow-500 text-white': permiso.tipo === 'parcial'
+              'bg-blue-500 text-white': permisoGrifo.tipo === 'Con bomba',
+              'bg-green-500 text-white': permisoGrifo.tipo === 'Sin bomba'
             }" class="inline-block px-4 py-2 rounded-full text-base font-bold capitalize">
-              {{ permiso.tipo }}
+              {{ permisoGrifo.tipo }}
             </span>
           </div>
-          <div class="text-base text-gray-800">{{ permiso.solicitante }}</div>
+          <div class="text-base text-gray-800">{{ permisoGrifo.solicitante }}</div>
           <div class="text-base text-gray-800 truncate max-w-[150px]">
-            {{ permiso.motivo }}
+            {{ permisoGrifo.motivo }}
           </div>
-          <div class="text-base text-gray-800">{{ permiso.fecha }}</div>
+          <div class="text-base text-gray-800">{{ permisoGrifo.fecha }}</div>
           <div class="text-base">
             <span :class="{
-              'bg-slate-600 text-white': permiso.estado === 'En revision',
-              'bg-green-500 text-white': permiso.estado === 'AUTORIZADO',
-              'bg-red-500 text-white': permiso.estado === 'RECHAZADO',
+              'bg-slate-600 text-white': permisoGrifo.estado === 'En revision',
+              'bg-green-500 text-white': permisoGrifo.estado === 'AUTORIZADO',
+              'bg-red-500 text-white': permisoGrifo.estado === 'RECHAZADO',
             }" class="inline-block px-4 py-2 rounded-full text-base font-bold">
-              {{ permiso.estado }}
+              {{ permisoGrifo.estado }}
             </span>
           </div>
           <div class="flex justify-center items-center bg-gray-400 p-2 w-20 rounded-md">
-            <button @click.stop="eliminarPermiso(permiso.id)"
+            <button @click.stop="eliminarPermiso(permisoGrifo.id)"
               class="text-slate-800 hover:text-red-800 transition-all duration-300 p-2 rounded-full flex justify-center items-center">
               <i class="fa-solid fa-trash-can text-2xl"></i>
             </button>
@@ -119,47 +119,44 @@
           <!-- Campo editable -->
           <p class="mb-2"><strong>ID:</strong></p>
           <div class="w-full p-2 border rounded bg-gray-200 mb-2">
-            {{ selectedPermiso.id }}
+            {{ selectedPermisoGrifo.id }}
           </div>
 
           <p class="mb-2"><strong>Tipo:</strong></p>
-          <select v-model="selectedPermiso.tipo" :disabled="!isEditing" class="w-full p-2 border rounded mb-2"
-            :class="selectedPermiso.tipo === 'total' ? 'bg-red-100 border-red-500' : 'bg-yellow-100 border-yellow-500'">
-            <option value="total">Corte Total</option>
-            <option value="parcial">Corte Parcial</option>
+          <select v-model="selectedPermisoGrifo.tipo" :disabled="!isEditing" class="w-full p-2 border rounded mb-2"
+            :class="selectedPermisoGrifo.tipo === 'Con bomba' ? 'bg-blue-100 border-blue-500' : 'bg-green-100 border-green-500'">
+            <option value="Con bomba">Con bomba</option>
+            <option value="Sin bomba">Sin bomba</option>
           </select>
 
           <p class="mb-2"><strong>Solicitante:</strong></p>
-          <input v-model="selectedPermiso.solicitante" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
+          <input v-model="selectedPermisoGrifo.solicitante" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
 
           <p class="mb-2"><strong>Correo electrónico:</strong></p>
-          <input v-model="selectedPermiso.email" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
+          <input v-model="selectedPermisoGrifo.email" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
 
           <p class="mb-2"><strong>Motivo:</strong></p>
-          <input v-model="selectedPermiso.motivo" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
+          <input v-model="selectedPermisoGrifo.motivo" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
 
           <p class="mb-2"><strong>Fecha:</strong></p>
-          <p  v-if="!isEditing" class="w-full p-2 border rounded  mb-2"> {{ selectedPermiso.fecha }}</p>
-          <input v-else v-model="selectedPermiso.fecha" type="date" :disabled="!isEditing"
+          <p  v-if="!isEditing" class="w-full p-2 border rounded  mb-2"> {{ selectedPermisoGrifo.fecha }}</p>
+          <input v-else v-model="selectedPermisoGrifo.fecha" type="date" :disabled="!isEditing"
             class="w-full p-2 border rounded mb-2" />
 
           <p class="mb-2"><strong>Inicio:</strong></p>
-          <p  v-if="!isEditing" class="w-full p-2 border rounded mb-2"> {{ selectedPermiso.inicio }}</p>
-          <input v-else v-model="selectedPermiso.inicio" type="datetime-local" :disabled="!isEditing"
+          <p  v-if="!isEditing" class="w-full p-2 border rounded mb-2"> {{ selectedPermisoGrifo.inicio }}</p>
+          <input v-else v-model="selectedPermisoGrifo.inicio" type="datetime-local" :disabled="!isEditing"
             class="w-full p-2 border rounded mb-2" />
 
           <p class="mb-2"><strong>Término:</strong></p>
-          <p  v-if="!isEditing" class="w-full p-2 border rounded mb-2"> {{ selectedPermiso.termino }}</p>
+          <p  v-if="!isEditing" class="w-full p-2 border rounded mb-2"> {{ selectedPermisoGrifo.termino }}</p>
 
-          <input v-else v-model="selectedPermiso.termino" type="datetime-local" :disabled="!isEditing"
+          <input v-else v-model="selectedPermisoGrifo.termino" type="datetime-local" :disabled="!isEditing"
             class="w-full p-2 border rounded mb-2" />
 
-          <p class="mb-2"><strong>Calle:</strong></p>
-          <input v-model="selectedPermiso.calle" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
+          <p class="mb-2"><strong>Numero grifo (Ubicacion):</strong></p>
+          <input v-model="selectedPermisoGrifo.numero_grifo" :disabled="!isEditing" class="w-full p-2 border rounded mb-2" />
 
-          <p class="mb-2"><strong>Observación:</strong></p>
-          <textarea v-model="selectedPermiso.observacion" :disabled="!isEditing"
-            class="w-full p-2 border rounded mb-2"></textarea>
         </div>
 
         <!-- Contenedor del mapa -->
@@ -168,7 +165,7 @@
           <div id="map" class="h-5/6 w-full rounded-xl"></div>
 
           <!-- Botones de Autorizar y Rechazar -->
-          <div v-if="selectedPermiso.estado === 'En revision' || isEditing" class="flex justify-between mt-10">
+          <div v-if="selectedPermisoGrifo.estado === 'En revision' || isEditing" class="flex justify-between mt-10">
             <button @click="autorizarPermiso"
               class="bg-green-500 text-white p-4 rounded-lg w-1/2 mr-2 hover:bg-green-600">
               Autorizar
@@ -199,10 +196,10 @@ export default {
   data() {
     return {
       isEditing: false,
-      originalPermiso: null,
-      permisos: [],
+      originalPermisoGrifo: null,
+      permisosGrifos: [],
       isModalVisible: false,
-      selectedPermiso: null,
+      selectedPermisoGrifo: null,
       searchQuery: "",
       sortBy: "id",
       sortOrder: "desc",
@@ -215,18 +212,18 @@ export default {
     },
     startEditing() {
       this.isEditing = true;
-      this.originalPermiso = JSON.parse(JSON.stringify(this.selectedPermiso)); // Cambiar el estado a modo de edición
+      this.originalPermisoGrifo = JSON.parse(JSON.stringify(this.selectedPermisoGrifo)); // Cambiar el estado a modo de edición
     },
     cancelEditing() {
-      if (this.originalPermiso) {
-        this.selectedPermiso = JSON.parse(JSON.stringify(this.originalPermiso)); // Restaura los valores originales
+      if (this.originalPermisoGrifo) {
+        this.selectedPermisoGrifo = JSON.parse(JSON.stringify(this.originalPermisoGrifo)); // Restaura los valores originales
       }
       this.isEditing = false; // Sale del modo edición
     },
 
 
     async saveChanges() {
-      if (!this.selectedPermiso || !this.selectedPermiso.id) {
+      if (!this.selectedPermisoGrifo || !this.selectedPermisoGrifo.id) {
         console.error("No hay un permiso seleccionado para actualizar.");
         return;
       }
@@ -238,21 +235,20 @@ export default {
         const updatedData = {};
 
         // Solo agrega las propiedades modificadas
-        if (this.selectedPermiso.tipo) updatedData.tipo = this.selectedPermiso.tipo;
-        if (this.selectedPermiso.fecha) updatedData.fecha = this.selectedPermiso.fecha;
-        if (this.selectedPermiso.solicitante) updatedData.solicitante = this.selectedPermiso.solicitante;
-        if (this.selectedPermiso.email) updatedData.email = this.selectedPermiso.email;
-        if (this.selectedPermiso.inicio) updatedData.inicio = this.selectedPermiso.inicio;
-        if (this.selectedPermiso.termino) updatedData.termino = this.selectedPermiso.termino;
-        if (this.selectedPermiso.calle) updatedData.calle = this.selectedPermiso.calle;
-        if (this.selectedPermiso.latitud) updatedData.latitud = this.selectedPermiso.latitud;
-        if (this.selectedPermiso.longitud) updatedData.longitud = this.selectedPermiso.longitud;
-        if (this.selectedPermiso.observacion) updatedData.observacion = this.selectedPermiso.observacion;
-        if (this.selectedPermiso.estado) updatedData.estado = this.selectedPermiso.estado;
-        if (this.selectedPermiso.motivo) updatedData.motivo = this.selectedPermiso.motivo;
+        if (this.selectedPermisoGrifo.tipo) updatedData.tipo = this.selectedPermisoGrifo.tipo;
+        if (this.selectedPermisoGrifo.fecha) updatedData.fecha = this.selectedPermisoGrifo.fecha;
+        if (this.selectedPermisoGrifo.solicitante) updatedData.solicitante = this.selectedPermisoGrifo.solicitante;
+        if (this.selectedPermisoGrifo.email) updatedData.email = this.selectedPermisoGrifo.email;
+        if (this.selectedPermisoGrifo.inicio) updatedData.inicio = this.selectedPermisoGrifo.inicio;
+        if (this.selectedPermisoGrifo.termino) updatedData.termino = this.selectedPermisoGrifo.termino;
+        if (this.selectedPermisoGrifo.numero_grifo) updatedData.numero_grifo = this.selectedPermisoGrifo.numero_grifo;
+        if (this.selectedPermisoGrifo.latitud) updatedData.latitud = this.selectedPermisoGrifo.latitud;
+        if (this.selectedPermisoGrifo.longitud) updatedData.longitud = this.selectedPermisoGrifo.longitud;
+        if (this.selectedPermisoGrifo.estado) updatedData.estado = this.selectedPermisoGrifo.estado;
+        if (this.selectedPermisoGrifo.motivo) updatedData.motivo = this.selectedPermisoGrifo.motivo;
 
         const response = await axios.put(
-          `http://localhost:3002/permisos/${this.selectedPermiso.id}`,
+          `http://localhost:3002/permisosGrifos/${this.selectedPermisoGrifo.id}`,
           updatedData, // Enviar solo los datos modificados
           {
             headers: {
@@ -263,15 +259,15 @@ export default {
         );
 
         if (response.status === 200) {
-          // Actualiza la lista de permisos en la UI
-          const index = this.permisos.findIndex(c => c.id === this.selectedPermiso.id);
+          // Actualiza la lista de permisosGrifos en la UI
+          const index = this.permisosGrifos.findIndex(c => c.id === this.selectedPermisoGrifo.id);
           if (index !== -1) {
-            this.permisos[index] = { ...this.selectedPermiso };
+            this.permisosGrifos[index] = { ...this.selectedPermisoGrifo };
           }
 
           this.toast.success("Permiso actualizado correctamente");
           this.isEditing = false; // Salir del modo edición
-          this.originalPermiso = null;
+          this.originalPermisoGrifo = null;
         }
       } catch (error) {
         console.error("Error al actualizar el permiso:", error);
@@ -293,7 +289,7 @@ export default {
     },
 
 
-    async fetchPermisos() {
+    async fetchPermisosGrifos() {
       try {
         // Retrieve the token from localStorage
         const token = localStorage.getItem('authToken');
@@ -303,61 +299,61 @@ export default {
           return;
         }
 
-        const response = await axios.get("http://localhost:3002/permisos", {
+        const response = await axios.get("http://localhost:3002/permisosGrifos", {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
 
         // Asegurarse de que la respuesta sea un array
-        this.permisos = Array.isArray(response.data) ? response.data : [];
+        this.permisosGrifos = Array.isArray(response.data) ? response.data : [];
 
-        // Si no hay permisos, establecer un mensaje
-        if (this.permisos.length === 0) {
-          console.log("No hay permisos disponibles.");
+        // Si no hay permisosGrifos, establecer un mensaje
+        if (this.permisosGrifos.length === 0) {
+          console.log("No hay permisos de uso de grifos disponibles.");
         } else {
           // Realizar conversiones a las fechas
-          this.permisos.map((permiso) => {
-            permiso.fecha = this.convertirAFecha(permiso.fecha);
-            permiso.inicio = this.convertirATemporal(permiso.inicio);
-            permiso.termino = this.convertirATemporal(permiso.termino);
+          this.permisosGrifos.map((permisoGrifo) => {
+            permisoGrifo.fecha = this.convertirAFecha(permisoGrifo.fecha);
+            permisoGrifo.inicio = this.convertirATemporal(permisoGrifo.inicio);
+            permisoGrifo.termino = this.convertirATemporal(permisoGrifo.termino);
           });
-          this.permisos.sort((a, b) => b.id - a.id); // Descending order by ID
+          this.permisosGrifos.sort((a, b) => b.id - a.id); // Descending order by ID
         }
 
       } catch (error) {
-        console.error("Error al obtener los permisos:", error);
+        console.error("Error al obtener los permisos de uso de grifos:", error);
         if (error.response && error.response.status === 401) {
           console.error("No autorizado. Verifique el token.");
         }
-        // Asegurarse de que permisos sea un array vacío en caso de error
-        this.permisos = [];
+        // Asegurarse de que permisosGrifos sea un array vacío en caso de error
+        this.permisosGrifos = [];
       }
     },
 
 
 
 
-    openModal(permiso) {
-      this.selectedPermiso = { ...permiso };
+    openModal(permisoGrifo) {
+      this.selectedPermisoGrifo = { ...permisoGrifo };
 
       this.isModalVisible = true;
 
       this.$nextTick(() => {
-        this.initMap(permiso.latitud, permiso.longitud, permiso.tipo);
+        this.initMap(permisoGrifo.latitud, permisoGrifo.longitud, permisoGrifo.tipo);
       });
     },
 
 
     closeModal() {
       this.isModalVisible = false;
-      this.selectedPermiso = null;
+      this.selectedPermisoGrifo = null;
     },
     initMap(lat, lon, tipo) {
       const map = L.map('map').setView([lat, lon], 16);
 
       // Define el ícono personalizado basado en el tipo de permiso
-      const iconUrl = tipo === "total" ? "/marker_red.png" : "/marker_yellow.png";
+      const iconUrl = tipo === "Con bomba" ? "/grifo_bomba.png" : "/grifo_sinbomba.png";
       const customIcon = L.icon({
         iconUrl,
         iconSize: [45, 45], // Tamaño del ícono
@@ -371,8 +367,7 @@ export default {
 
       L.marker([lat, lon], { icon: customIcon })
         .addTo(map)
-        .bindPopup("Ubicación del permiso")
-        .openPopup();
+        
     },
     async autorizarPermiso() {
       try {
@@ -385,12 +380,12 @@ export default {
 
         // Send the full data along with the modified status
         const permisoData = {
-          ...this.selectedPermiso, // Spread the existing permission data
+          ...this.selectedPermisoGrifo, // Spread the existing permission data
           estado: "AUTORIZADO", // Update the status
         };
 
         // Send the update request to the backend
-        const response = await axios.put(`http://localhost:3002/permisos/${this.selectedPermiso.id}`, permisoData, {
+        const response = await axios.put(`http://localhost:3002/permisosGrifos/${this.selectedPermisoGrifo.id}`, permisoData, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -399,11 +394,11 @@ export default {
         // Check for successful response and show toast
         if (response.status === 200) {
           // Update the state of the permiso in the list directly
-          const index = this.permisos.findIndex(p => p.id === this.selectedPermiso.id);
+          const index = this.permisosGrifos.findIndex(p => p.id === this.selectedPermisoGrifo.id);
           if (index !== -1) {
-            this.permisos[index].estado = "AUTORIZADO";
+            this.permisosGrifos[index].estado = "AUTORIZADO";
           }
-          this.permisos.sort((a, b) => b.id - a.id); // Descending order by ID
+          this.permisosGrifos.sort((a, b) => b.id - a.id); // Descending order by ID
 
 
           this.toast.success("Permiso autorizado correctamente");
@@ -428,12 +423,12 @@ export default {
 
         // Send the full data along with the modified status
         const permisoData = {
-          ...this.selectedPermiso, // Spread the existing permission data
+          ...this.selectedPermisoGrifo, // Spread the existing permission data
           estado: "RECHAZADO", // Update the status
         };
 
         // Send the update request to the backend
-        const response = await axios.put(`http://localhost:3002/permisos/${this.selectedPermiso.id}`, permisoData, {
+        const response = await axios.put(`http://localhost:3002/permisosGrifos/${this.selectedPermisoGrifo.id}`, permisoData, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -442,12 +437,12 @@ export default {
         // Check for successful response and show toast
         if (response.status === 200) {
           // Update the state of the permiso in the list directly
-          const index = this.permisos.findIndex(p => p.id === this.selectedPermiso.id);
+          const index = this.permisosGrifos.findIndex(p => p.id === this.selectedPermisoGrifo.id);
           if (index !== -1) {
-            this.permisos[index].estado = "RECHAZADO";
+            this.permisosGrifos[index].estado = "RECHAZADO";
           }
 
-          this.permisos.sort((a, b) => b.id - a.id); // Descending order by ID
+          this.permisosGrifos.sort((a, b) => b.id - a.id); // Descending order by ID
 
 
           this.toast.error("Permiso rechazado correctamente");
@@ -466,7 +461,7 @@ export default {
 
       try {
         // Realizar el DELETE en la base de datos
-        const response = await axios.delete(`http://localhost:3002/permisos/${id}`, {
+        const response = await axios.delete(`http://localhost:3002/permisosGrifos/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -474,7 +469,7 @@ export default {
 
         if (response.status === 200) {
           // Si la eliminación es exitosa, eliminar el permiso de la lista de Vue
-          this.permisos = this.permisos.filter(permiso => permiso.id !== id);
+          this.permisosGrifos = this.permisosGrifos.filter(permisoGrifo => permisoGrifo.id !== id);
           this.toast.success("Permiso eliminado correctamente");
         }
       } catch (error) {
@@ -487,19 +482,19 @@ export default {
 
   },
   mounted() {
-    this.fetchPermisos();
+    this.fetchPermisosGrifos();
   },
   computed: {
     toast() {
       return useToast();
     },
-    filteredAndSortedPermisos() {
-      return this.permisos
-        .filter(permiso =>
-          permiso.solicitante.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          permiso.motivo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          permiso.tipo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          permiso.fecha.toLowerCase().includes(this.searchQuery.toLowerCase())
+    filteredAndSortedPermisosGrifos() {
+      return this.permisosGrifos
+        .filter(permisoGrifo =>
+          permisoGrifo.solicitante.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          permisoGrifo.motivo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          permisoGrifo.tipo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          permisoGrifo.fecha.toLowerCase().includes(this.searchQuery.toLowerCase())
 
 
         )

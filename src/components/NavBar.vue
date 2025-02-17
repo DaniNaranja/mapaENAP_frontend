@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar bg-gradient-to-r from-gray-100 to-violet-200 h-20 flex items-center">
+    <div :class="navbarClass" class="navbar h-20 flex items-center">
       <!-- Contenedor del logo condicional -->
       <div v-if="isAuthenticated" class="flex items-center">
         <router-link to="/mapa">
@@ -51,24 +51,31 @@
     name: "NavBar",
     data() {
       return {
-        showMenu: false, // Para controlar si el menú desplegable está visible
+        showMenu: false, 
       };
     },
     computed: {
-      // Acceder al estado de Vuex para isAuthenticated y username
       isAuthenticated() {
         return this.$store.state.isAuthenticated;
       },
       username() {
         return this.$store.state.username || "Usuario";
       },
+      navbarClass() {
+      
+      const rutasGrifos = ['/grifos', '/grifohome', '/grifohistorial', '/solicitudgrifos'];
+      return rutasGrifos.includes(this.$route.path) 
+        ? 'navbar bg-gradient-to-r from-gray-100 to-violet-200'  // Cambiar el degradado a azul
+        : 'navbar bg-gradient-to-r from-gray-100 to-violet-200'; // Estilo predeterminado
+    }
     },
     methods: {
+     
       toggleMenu() {
         this.showMenu = !this.showMenu;
       },
       logout() {
-        this.$store.dispatch('logout');  // Llamar la acción de Vuex para cerrar sesión
+        this.$store.dispatch('logout'); 
         this.showMenu = false;
         this.$router.push('/'); // Redirige a la página de inicio después de cerrar sesión
       },
@@ -77,12 +84,12 @@
   </script>
   
   <style scoped>
-  /* Aquí se usa 'fixed' para que el menú esté fuera de la navbar */
+ 
   .fixed {
     position: fixed;
-    top: 80px;  /* Ajusta esto dependiendo de la altura de la navbar */
-    right: 20px; /* O puedes usar 'right: 0' para alinearlo a la derecha de la pantalla */
-    z-index: 50; /* Asegúrate de que el menú esté por encima de otros elementos */
+    top: 80px;  
+    right: 20px; 
+    z-index: 50; 
   }
   </style>
   

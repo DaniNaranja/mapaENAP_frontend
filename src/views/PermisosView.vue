@@ -371,8 +371,7 @@ export default {
 
       L.marker([lat, lon], { icon: customIcon })
         .addTo(map)
-        .bindPopup("Ubicación del permiso")
-        .openPopup();
+        
     },
     async autorizarPermiso() {
       try {
