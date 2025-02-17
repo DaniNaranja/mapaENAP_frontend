@@ -6,6 +6,8 @@ import HistorialView from '@/views/HistorialView.vue'
 import LoginView from '../views/LoginView.vue'
 import GrifoHomeView from '@/views/GrifoHomeView.vue'
 import GrifoAdminView from '@/views/GrifoAdminView.vue'
+import SolicitudGrifoView from '@/views/SolicitudGrifoView.vue'
+import HistorialGrifoView from '@/views/HistorialGrifoView.vue'
 
 const routes = [
   {
@@ -45,6 +47,18 @@ const routes = [
     path: '/grifos',
     name: 'grifos',
     component: GrifoAdminView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/solicitudgrifos',
+    name: 'solicitudgrifos',
+    component: SolicitudGrifoView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/grifohistorial',
+    name: 'grifohistorial',
+    component: HistorialGrifoView,
     meta: { requiresAuth: true },
   }
 ]

@@ -17,10 +17,10 @@
           <div
             :class="[
               'w-full p-2 border rounded mb-2',
-              usoGrifo.tipo === 'total' ? 'bg-red-100 border-red-500' : 'bg-yellow-100 border-yellow-500'
+              usoGrifo.tipo === 'Con bomba' ? 'bg-blue-100 border-blue-500' : 'bg-green-100 border-green-500'
             ]"
           >
-            {{ usoGrifo.tipo === 'total' ? 'Corte Total' : 'Corte Parcial' }}
+            {{ usoGrifo.tipo === 'Con bomba' ? 'Con bomba' : 'Sin bomba' }}
           </div>
           <p class="mb-2">
             <strong>Calle:</strong>

@@ -3,7 +3,8 @@
     v-if="mostrarSidebar"
     class="sidebar bg-gradient-to-b from-purple-500 to-indigo-800 sticky top-[5rem]"
   >
-  <div class="h-14 bg-violet-950 flex items-center">
+  <div class="h-16 bg-violet-950 flex items-center">
+    <i class="fa-solid fa-road-circle-xmark my-2.5 mx-1.5 text-white text-xl"></i>
     <span class="text-white font-semibold text-lg ml-2">Corte de calles</span></div>
     <RouterLink
       to="/mapa"
@@ -38,7 +39,9 @@
       </div>
       <i class="fas fa-chevron-right text-xl text-white ml-3"></i>
     </RouterLink>
-    <div class=" h-14 bg-violet-950 flex items-center">
+    <div class=" h-16 bg-violet-950 flex items-center">
+      <img src="grifo.png" alt="" class="h-8 my-2.5 mx-1.5 text-white">
+
       <span class="text-white font-semibold text-lg ml-2">Uso de grifos</span></div>
     
     <RouterLink
@@ -47,8 +50,30 @@
       class="flex items-center justify-between pr-4 pl-4 pt-2 pb-2 hover:bg-violet-900"
     >
       <div class="flex items-center">
-        <img src="grifo.png" alt="" class="h-9 my-2.5 mx-1.5 text-white">
+        <i class="fa-solid fa-map-location-dot m-3 text-2xl text-white"></i>
         <span class="text-white font-semibold text-base ml-1">Mapa grifos</span>
+      </div>
+      <i class="fas fa-chevron-right text-xl text-white ml-3"></i>
+    </RouterLink>
+    <RouterLink
+      to="/solicitudgrifos"
+      :class="isActive('/solicitudgrifos') ? 'bg-violet-800' : ''"
+      class="flex items-center justify-between pr-4 pl-4 pt-2 pb-2 hover:bg-violet-900"
+    >
+      <div class="flex items-center">
+        <i class="fa-solid fa-clipboard-list m-3.5 text-2xl text-white"></i>
+        <span class="text-white font-semibold text-base ml-1">Solicitud grifos</span>
+      </div>
+      <i class="fas fa-chevron-right text-xl text-white ml-3"></i>
+    </RouterLink>
+    <RouterLink
+      to="/grifohistorial"
+      :class="isActive('/grifohistorial') ? 'bg-violet-800' : ''"
+      class="flex items-center justify-between pr-4 pl-4 pt-2 pb-2 hover:bg-violet-900"
+    >
+      <div class="flex items-center">
+        <i class="fa-solid fa-clock-rotate-left m-3 text-2xl text-white"></i>
+        <span class="text-white font-semibold text-base ml-1">Historial grifos</span>
       </div>
       <i class="fas fa-chevron-right text-xl text-white ml-3"></i>
     </RouterLink>
