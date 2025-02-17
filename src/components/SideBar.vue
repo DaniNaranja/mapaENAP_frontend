@@ -3,9 +3,11 @@
     v-if="mostrarSidebar"
     class="sidebar bg-gradient-to-b from-purple-500 to-indigo-800 sticky top-[5rem]"
   >
+  <div class="h-14 bg-violet-950 flex items-center">
+    <span class="text-white font-semibold text-lg ml-2">Corte de calles</span></div>
     <RouterLink
       to="/mapa"
-      :class="isActive('/mapa') ? 'bg-violet-900' : ''"
+      :class="isActive('/mapa') ? 'bg-violet-800' : ''"
       class="flex items-center justify-between pr-4 pl-4 pt-2 pb-2 hover:bg-violet-900"
     >
       <div class="flex items-center">
@@ -16,7 +18,7 @@
     </RouterLink>
     <RouterLink
       to="/permisos"
-      :class="isActive('/permisos') ? 'bg-violet-900' : ''"
+      :class="isActive('/permisos') ? 'bg-violet-800' : ''"
       class="flex items-center justify-between pr-4 pl-4 pt-2 pb-2 hover:bg-violet-900"
     >
       <div class="flex items-center">
@@ -27,12 +29,26 @@
     </RouterLink>
     <RouterLink
       to="/historial"
-      :class="isActive('/historial') ? 'bg-violet-900' : ''"
+      :class="isActive('/historial') ? 'bg-violet-800' : ''"
       class="flex items-center justify-between pr-4 pl-4 pt-2 pb-2 hover:bg-violet-900"
     >
       <div class="flex items-center">
         <i class="fa-solid fa-clock-rotate-left m-3 text-2xl text-white"></i>
         <span class="text-white font-semibold text-base">Historial</span>
+      </div>
+      <i class="fas fa-chevron-right text-xl text-white ml-3"></i>
+    </RouterLink>
+    <div class=" h-14 bg-violet-950 flex items-center">
+      <span class="text-white font-semibold text-lg ml-2">Uso de grifos</span></div>
+    
+    <RouterLink
+      to="/grifos"
+      :class="isActive('/grifos') ? 'bg-violet-800' : ''"
+      class="flex items-center justify-between pr-4 pl-4 pt-2 pb-2 hover:bg-violet-900"
+    >
+      <div class="flex items-center">
+        <img src="grifo.png" alt="" class="h-9 my-2.5 mx-1.5 text-white">
+        <span class="text-white font-semibold text-base ml-1">Mapa grifos</span>
       </div>
       <i class="fas fa-chevron-right text-xl text-white ml-3"></i>
     </RouterLink>
@@ -48,7 +64,7 @@ export default {
       // Obtenemos la ruta actual utilizando el enrutador de Vue
       const rutaActual = this.$route.path;
       // Ocultamos la barra lateral si estamos en la vista de login
-      return rutaActual !== "/login" && rutaActual !== "/";
+      return rutaActual !== "/login" && rutaActual !== "/" && rutaActual !== "/grifohome";
     },
   },
   methods: {
@@ -61,7 +77,7 @@ export default {
 
 <style scoped>
 .sidebar {
-  width: 12rem;
+  width: 13rem;
   /* Ancho de la barra lateral */
   height: calc(100vh - 5rem);
   /* Altura dinámica que descuenta la altura del NavBar (5rem) */

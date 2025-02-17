@@ -18,9 +18,15 @@
     <!-- Contenedor derecho: Notificaciones -->
     <div class="bg-white border-l shadow-lg overflow-y-auto" style=" width: 30%;height: calc(100vh - 5rem);">
       <!-- Título de Notificaciones fijo -->
-      <div class="sticky top-0 bg-white z-10 p-4 shadow-sm">
+      <div class="sticky top-0 bg-white z-10 p-4 shadow-sm flex items-center justify-between">
         <h2 class="text-xl font-bold">Cortes registrados para hoy</h2>
+        <RouterLink to="/grifohome">
+          <button class="bg-blue-500 text-white px-4 py-3 rounded-md hover:bg-blue-700">
+            Mapa grifos
+          </button>
+        </RouterLink>
       </div>
+
 
       <!-- Ejemplo de notificaciones -->
       <NotificationCard v-for="(corte, index) in cortes" :key="index" :tipo="corte.tipo" :calle="corte.calle"
@@ -43,6 +49,7 @@ import ModalDetalles from "@/components/ModalDetalle.vue"
 import NotificationCard from "@/components/NotificationCard.vue";
 import MapViewer from "@/components/MapViewer.vue";
 import moment from 'moment-timezone'
+
 
 export default {
   name: "HomeView",

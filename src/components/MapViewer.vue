@@ -37,6 +37,15 @@ export default {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.map);
 
+    // Modificar el prototipo de L.Marker para solucionar el error de zoom
+    L.Marker.prototype._animateZoom = function (opt) {
+      if (!this._map) {
+        return;
+      }
+      const pos = this._map._latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center).round();
+      this._setPos(pos);
+    };
+
     // Renderizar marcadores iniciales
     this.actualizarMarcadores(this.cortes);
 
@@ -45,10 +54,25 @@ export default {
       const { lat, lng } = e.latlng;
       this.$emit("map-click", { lat, lng }); // Emitir evento con las coordenadas
     });
+
+    // Asegurarse de actualizar los marcadores después de mover o hacer zoom en el mapa
+    this.map.on("moveend", () => {
+      this.actualizarMarcadores(this.cortes);
+    });
+
+    this.map.on("zoomend", () => {
+      this.actualizarMarcadores(this.cortes);
+    });
+
+    // Limpiar los marcadores y popups después de cerrar un popup
+    this.map.on("popupclose", () => {
+      // Reiniciar los marcadores cuando se cierra el popup
+      this.actualizarMarcadores(this.cortes);
+    });
   },
   methods: {
     actualizarMarcadores(cortes) {
-      // Limpiar marcadores anteriores
+      // Limpiar los marcadores anteriores
       this.markers.forEach((marker) => {
         this.map.removeLayer(marker);
       });
